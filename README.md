@@ -10,6 +10,7 @@ This script is meant to be put in a cron-job on a machine and run periodically.
 I run it every day at 9:31 AM Romanian Time.
 
 What it will do, is:
+
 1. Look for any conf files within the directory where the script is situated
 2. It will read **Quotes of Days** from various sources
 3. For each conf file
