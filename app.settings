@@ -1,0 +1,4 @@
+[mail]
+address=<email.addr>
+password=<email.pass-sorry-clear-text-for-now>
+destination=<destination.email.addr>
