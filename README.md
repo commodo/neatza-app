@@ -14,9 +14,9 @@ What it will do, is:
 1. Look for any conf files within the directory where the script is situated
 2. It will read **Quotes of Days** from various sources
 3. For each conf file
---1. Extract one line (which is supposed to be an URL of a pic) 
---2. Assign it a random quote from the list
---3. Send email
+ 1. Extract one line (which is supposed to be an URL of a pic) 
+ 2. Assign it a random quote from the list
+ 3. Send email
 
 At the moment, it works only for sending to an emailing list.
 
