@@ -1,5 +1,7 @@
 #!/usr/bin/env python 
 
+# -*- coding: utf-8 -*-
+
 """
 Neatza App
 
@@ -25,10 +27,12 @@ import random
 from BeautifulSoup import BeautifulSoup
 import socket
 
-import logging
+import logging as log
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+import traceback
 
 import ConfigParser
 
@@ -49,8 +53,8 @@ def sendemail(from_addr, to_addr_list, cc_addr_list,
     msg['Cc'] = ','.join(cc_addr_list)
 
     # Record the MIME types of both parts - text/plain and text/html.
-    part1 = MIMEText(msg_text, 'plain')
-    part2 = MIMEText(msg_html, 'html')
+    part1 = MIMEText(unicode(msg_text).encode('utf-8'), 'plain')
+    part2 = MIMEText(unicode(msg_html).encode('utf-8'), 'html')
 
     # Attach parts into message container.
     # According to RFC 2046, the last part of a multipart message, in this case
@@ -67,7 +71,7 @@ def sendemail(from_addr, to_addr_list, cc_addr_list,
     server.sendmail(from_addr, to_addr_list, msg.as_string())
     server.quit()
 
-def validate_is_image(img_url):
+def valid_image(img_url):
     """ Validates that the given URL is actually a valid image.
         Returns True if there's a valid image at the given URL, and False otherwise.
 
@@ -81,9 +85,9 @@ def validate_is_image(img_url):
     except:
         return False
 
-def extract_an_url(fname):
+def extract_destinations_an_url(fname):
     """ Extracts from a filename the list of senders to which to send a
-        URL from a file.
+        URL from a file, an also a URL.
 
         The file is re-written without the extracted URL.
 
@@ -91,28 +95,50 @@ def extract_an_url(fname):
     """
 
     valid_url = None
-    urls = []
+    lines = []
 
     fname = os.path.join(APP_DIR, fname)
 
     if (os.path.isfile(fname)):
         with open(fname, 'r') as f:
-            urls = f.readlines()
+            lines = f.readlines()
+
+    to_addrs = []
+
+    urls = lines
+    to_addrs_str = None
+    line_idx = 0
+    for line in lines:
+        line = line.replace( ' ', '' )
+        if (line.startswith( "destination" ) ):
+            to_addrs_str = line
+            line = line[len("destination"):]
+            if (line[0] == '='):
+                line = line[1:]
+            to_addrs = [ to_addr.strip() for to_addr in  line.split(',') ]
+            urls = lines[ line_idx + 1 : ]
+            break
+        elif (valid_image( line ) ):
+            break
+        line_idx += 1
+
     random.shuffle(urls)
 
     new_urls = []
     for url in urls:
         url = url.strip()
         if (url != ''):
-            if (valid_url is None) and (validate_is_image(url)):
+            if (valid_url is None) and (valid_image(url)):
                 valid_url = url
             else:
                 new_urls.append(url)
 
     with open(fname, 'w') as f:
+        if ( to_addrs_str ):
+            f.write( to_addrs_str )
         f.write('\n'.join(new_urls))
 
-    return (valid_url)
+    return (to_addrs, valid_url)
 
 def _get_eduro_com_qotds():
     """ Retrieve Quote Of The Day from eduro.com.
@@ -211,12 +237,29 @@ def _get_qotd_from_server(server_idx = 0):
 
     return (ret)
 
+def _get_goodreads_qotds():
+
+    qotd_url = "http://www.goodreads.com/quotes_of_the_day"
+
+    soup = BeautifulSoup( urllib.urlopen(qotd_url).read() )
+
+    quoteTexts = soup.findAll( 'div', attrs = { 'class' : 'quoteText' } )
+
+    qotds = []
+    for quoteText in quoteTexts:
+        qts = quoteText.text.split('&#8213;')
+        quote = qts[0].replace('&ldquo;','').replace('&rdquo;','')
+        qauth = qts[1]
+        qotds.append( (quote, qauth) )
+
+    return qotds
 
 def get_qotds():
     """ Retrieve a random Quote Of The Day.
         The result is returned as a list of tuples of (quote_text, quote_author).
     """
-    qotds = _get_quotationspage_com_qotds() + _get_eduro_com_qotds()
+    qotds = _get_quotationspage_com_qotds() + _get_eduro_com_qotds() + \
+            _get_goodreads_qotds()
     for qotd_server_idx in range ( len ( QOTD_SERVERS ) ):
         qotd = _get_qotd_from_server ( qotd_server_idx )
         if (qotd is not None):
@@ -230,7 +273,13 @@ def get_qotds():
 def main():
     qotds = get_qotds()
 
-    messages = {}
+    config = ConfigParser.RawConfigParser(allow_no_value=True)
+    config.readfp( open( os.path.join( APP_DIR, 'app.settings' ) ) )
+
+    email_addr = config.get( 'mail', 'address' )
+    email_pass = config.get( 'mail', 'password' )
+    default_email_dest_addr = config.get ( 'mail', 'destination' )
+
     for fname in os.listdir(APP_DIR):
         if (fname.endswith('.conf')):
             tag = fname[:-len('.conf')]
@@ -245,27 +294,17 @@ def main():
                        (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) )
 
             full_fname = os.path.join( APP_DIR, fname )
-            url = extract_an_url( full_fname )
+            to_addrs, url = extract_destinations_an_url( full_fname )
             if (url):
                 msg_text += u'\n\n%s' % ( url )
                 msg_html += (u'<br/><br/>') + \
                      (u'<img src="%s" style="max-width: 700px" >' % ( url ) )
 
-            messages[tag] = (subject, msg_text, msg_html)
-
-    config = ConfigParser.RawConfigParser(allow_no_value=True)
-    config.readfp( open( os.path.join( APP_DIR, 'app.settings' ) ) )
-
-    email_addr = config.get( 'mail', 'address' )
-    email_pass = config.get( 'mail', 'password' )
-    email_dest_addr = config.get ( 'mail', 'destination' )
-
-    subscription_map = { email_dest_addr : messages.values() }
-
-    for to_addr, messages in subscription_map.items():
-        for subject, msg_text, msg_html in messages:
+            to_addrs = set( to_addrs )
+            if (default_email_dest_addr):
+                to_addrs.add( default_email_dest_addr )
             sendemail(from_addr    = email_addr,
-                      to_addr_list = [ to_addr ],
+                      to_addr_list = list( to_addrs ),
                       cc_addr_list = [], 
                       subject      = subject,
                       msg_text     = msg_text,
@@ -274,9 +313,10 @@ def main():
                       password     = email_pass)
 
 if __name__ == "__main__":
-    logging.basicConfig(filename=os.path.join( APP_DIR, 'neatza_app.log' ), level=logging.INFO)
+    log.basicConfig(filename=os.path.join( APP_DIR, 'neatza_app.log' ), level=log.INFO)
     try:
         main()
     except Exception as e:
-        logging.error( str(e) )
+        for line in traceback.format_exc().splitlines():
+            log.error( line )
 
