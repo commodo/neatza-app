@@ -280,7 +280,10 @@ def main():
     email_pass = config.get( 'mail', 'password' )
     default_email_dest_addr = config.get ( 'mail', 'destination' )
 
-    for fname in os.listdir(APP_DIR):
+    files_in_app_dir = os.listdir(APP_DIR)
+    random.shuffle( files_in_app_dir )
+
+    for fname in files_in_app_dir:
         if (fname.endswith('.conf')):
             tag = fname[:-len('.conf')]
 
