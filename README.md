@@ -18,10 +18,8 @@ What it will do, is:
  2. Assign it a random quote from the list
  3. Send email
 
-At the moment, it works only for sending to an emailing list.
-
 I did this script out of fun for my friends (with which I share an emailing list).
 
-They wanted nude pics of girls, and I just created this small app one day because it was fun.
+They wanted nude pics of girls, and one day I just created this small app because it was fun.
 Now I just have to fill the buckets of pics every once in a while, to keep them happy.
 

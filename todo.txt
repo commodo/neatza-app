@@ -1,0 +1,3 @@
+Add http://faktsy.com/  support
+Add weather support
+Add pinterest.com + 500px.com scraper
