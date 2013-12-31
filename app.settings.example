@@ -2,3 +2,5 @@
 address=<email.addr>
 password=<email.pass-sorry-clear-text-for-now>
 destination=<destination.email.addr>
+[tags]
+tag1=<another_destintaion.email.addr>,<yet_another_destination.email.addr>
