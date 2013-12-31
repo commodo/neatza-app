@@ -1,4 +1,5 @@
 conf/
+log/
 app.settings
 *.swp
 *.log

@@ -38,6 +38,7 @@ import ConfigParser
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 CNF_DIR = os.path.join( APP_DIR, 'conf' )
+LOG_DIR = os.path.join( APP_DIR, 'log' )
 
 # When email fails https://support.google.com/mail/answer/14257
 
@@ -329,7 +330,9 @@ def main():
                       password     = email_pass)
 
 if __name__ == "__main__":
-    log.basicConfig(filename=os.path.join( APP_DIR, 'neatza_app.log' ), level=log.INFO)
+    log.basicConfig(filename = os.path.join( LOG_DIR, 'neatza_app.log' ),
+                    format   = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level    = log.INFO)
     try:
         main()
     except Exception as e:
