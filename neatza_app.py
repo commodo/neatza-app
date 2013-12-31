@@ -37,6 +37,7 @@ import traceback
 import ConfigParser
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
+CNF_DIR = os.path.join( APP_DIR, 'conf' )
 
 # When email fails https://support.google.com/mail/answer/14257
 
@@ -44,6 +45,19 @@ def sendemail(from_addr, to_addr_list, cc_addr_list,
               subject, msg_text, msg_html,
               login, password,
               smtpserver='smtp.gmail.com:587'):
+    """ Sends an email to a set of recipients by using a SMTP sever
+
+        from_addr -- The email address of the sender
+        to_addr_list -- A list of destination email addresses
+        cc_addr_list -- A list of CC destination email addresses
+        subject -- Subject of the email
+        msg_text -- The email message in plain text format
+        msg_html -- THe email message in HTML format
+        login -- Login username to an email server
+        password -- Password for the given username for login
+        smtpserver -- SMTP server to use to send emails; default is GMail's
+                      'smtp.gmail.com:587' address
+    """
 
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
@@ -85,9 +99,8 @@ def valid_image(img_url):
     except:
         return False
 
-def extract_destinations_an_url(fname):
-    """ Extracts from a filename the list of senders to which to send a
-        URL from a file, an also a URL.
+def extract_an_url(fname):
+    """ Extracts from a filename the list
 
         The file is re-written without the extracted URL.
 
@@ -95,32 +108,13 @@ def extract_destinations_an_url(fname):
     """
 
     valid_url = None
-    lines = []
+    urls = []
 
     fname = os.path.join(APP_DIR, fname)
 
     if (os.path.isfile(fname)):
         with open(fname, 'r') as f:
-            lines = f.readlines()
-
-    to_addrs = []
-
-    urls = lines
-    to_addrs_str = None
-    line_idx = 0
-    for line in lines:
-        line = line.replace( ' ', '' )
-        if (line.startswith( "destination" ) ):
-            to_addrs_str = line
-            line = line[len("destination"):]
-            if (line[0] == '='):
-                line = line[1:]
-            to_addrs = [ to_addr.strip() for to_addr in  line.split(',') ]
-            urls = lines[ line_idx + 1 : ]
-            break
-        elif (valid_image( line ) ):
-            break
-        line_idx += 1
+            urls = f.readlines()
 
     random.shuffle(urls)
 
@@ -134,11 +128,9 @@ def extract_destinations_an_url(fname):
                 new_urls.append(url)
 
     with open(fname, 'w') as f:
-        if ( to_addrs_str ):
-            f.write( to_addrs_str )
         f.write('\n'.join(new_urls))
 
-    return (to_addrs, valid_url)
+    return (valid_url)
 
 def _get_eduro_com_qotds():
     """ Retrieve Quote Of The Day from eduro.com.
@@ -189,11 +181,11 @@ def _get_quotationspage_com_qotds():
     return qotds
 
 QOTD_SERVERS = [
-    ( 'djxmmx.net',             17, 'Each Request'),
+    #( 'djxmmx.net',             17, 'Each Request'),
     #( 'qotd.nngn.net',          17, 'Daily'),
     #( 'qotd.atheistwisdom.com', 17, 'Daily'),
     #( 'ota.iambic.com',         17, 'Each Request'),
-    ( 'alpha.mike-r.com',       17, 'Each Request'),
+    #( 'alpha.mike-r.com',       17, 'Each Request'),
     #( 'electricbiscuit.org',    17, 'Each Request'),
 ]
 
@@ -280,12 +272,35 @@ def main():
     email_pass = config.get( 'mail', 'password' )
     default_email_dest_addr = config.get ( 'mail', 'destination' )
 
-    files_in_app_dir = os.listdir(APP_DIR)
-    random.shuffle( files_in_app_dir )
+    files_in_cnf_dir = os.listdir(CNF_DIR)
+    random.shuffle( files_in_cnf_dir )
 
-    for fname in files_in_app_dir:
+    for fname in files_in_cnf_dir:
+
+        url = None
+        full_fname = os.path.join( CNF_DIR, fname )
         if (fname.endswith('.conf')):
+            url = extract_an_url( full_fname )
+
+            if (url is None):
+                fname_next = fname + ".next"
+                for fname1 in sorted( files_in_cnf_dir ):
+                    if (fname1.startswith( fname_next ) ):
+                        full_fname1 = os.path.join( CNF_DIR, fname1 )
+                        url = extract_an_url( full_fname1 )
+                        if (url):
+                            os.rename( full_fname1, full_fname )
+                            break
+                        else:
+                            os.remove( full_fname1 )
+
+        if (url):
             tag = fname[:-len('.conf')]
+            try:
+                to_addrs = config.get ( 'tags', tag )
+                to_addrs = to_addrs.split(',')
+            except:
+                to_addrs = [ default_email_dest_addr ]
 
             if (len(qotds) > 0):
                 quote, qauth = qotds.pop()
@@ -296,8 +311,6 @@ def main():
                        (u'<div style="margin-left: 30px; margin-top: 10px">') + \
                        (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) )
 
-            full_fname = os.path.join( APP_DIR, fname )
-            to_addrs, url = extract_destinations_an_url( full_fname )
             if (url):
                 msg_text += u'\n\n%s' % ( url )
                 msg_html += (u'<br/><br/>') + \
