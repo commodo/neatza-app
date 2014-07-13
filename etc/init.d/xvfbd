@@ -1,0 +1,69 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          xvfbd
+# Required-Start:    
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts the X Virtual Frame Buffer
+### END INIT INFO
+#
+# xvfb
+#
+#   Written by David P. Wiggins, The Open Group, Inc.
+#   Start/stop script for Debian
+#   by Alexandru Ardelean <ardeleanalex@gmail.com>.
+#
+
+PIDFILE=/var/run/Xvfb.pid
+
+# Start the service Xvfb
+start() {
+    if [ -f "$PIDFILE" ]; then
+        echo "Xvfb server already running"
+    else
+        echo "Starting Xvfb server"
+        /usr/bin/Xvfb :1 -screen 0 800x600x24 2> /dev/null &
+        export DISPLAY=localhost:1.0
+        echo $(pidof Xvfb) > $PIDFILE
+    fi
+}
+
+
+# Restart the service Xvfb
+stop() {
+    if [ -f "$PIDFILE" ]; then
+        echo "Stopping Xvfb server"
+        pid=$(cat $PIDFILE)
+        kill -9 $pid
+        ### Now, delete the pid file ###
+        rm -f $PIDFILE
+        echo
+    else
+        echo "Xvfb not running"
+    fi
+}
+
+
+### main logic ###
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status Xvfb
+        ;;
+  restart|reload|condrestart)
+        stop
+        start
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|reload|status}"
+        exit 1
+esac
+
+
+exit 0
