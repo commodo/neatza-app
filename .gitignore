@@ -1,5 +1,7 @@
+cache/
 conf/
 log/
 app.settings
 *.swp
 *.log
+*.pyc
