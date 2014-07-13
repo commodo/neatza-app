@@ -3,6 +3,7 @@ import sys
 import os
 import cv2 # Python OpenCV to be more exact
 import tempfile
+import urllib
 
 def detectObjects(img_url, cl_xml):
     """Converts an image to grayscale and prints the locations of any
