@@ -25,3 +25,7 @@ They wanted nude pics of girls, and one day I just created this small app becaus
 There's a script to populate the conf files, from sources.
 I wrote some scrapers, and I'll have to write a few more in the future.
 
+**Note**: some scrapers require PyQT installed on the system.
+And if you're running it on the server you'll also need X virtual framebuffer installed.
+For that, there's also a small **init.d** script.
+
