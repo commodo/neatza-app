@@ -282,18 +282,6 @@ def main():
         if (fname.endswith('.conf')):
             url = extract_an_url( full_fname )
 
-            if (url is None):
-                fname_next = fname + ".next"
-                for fname1 in sorted( files_in_cnf_dir ):
-                    if (fname1.startswith( fname_next ) ):
-                        full_fname1 = os.path.join( CNF_DIR, fname1 )
-                        url = extract_an_url( full_fname1 )
-                        if (url):
-                            os.rename( full_fname1, full_fname )
-                            break
-                        else:
-                            os.remove( full_fname1 )
-
         if (url):
             tags = [ fname[:-len('.conf')] ]
             if (len(qotds) > 0):
