@@ -291,7 +291,7 @@ def main():
 
         for tag in tags:
             try:
-                to_addrs = config.get ( 'tags', tag )
+                to_addrs = config.get ( 'email_overrides', tag )
                 to_addrs = to_addrs.split(',')
             except:
                 to_addrs = [ default_email_dest_addr ]
