@@ -282,39 +282,41 @@ def main():
         if (fname.endswith('.conf')):
             url = extract_an_url( full_fname )
 
-        if (url):
-            tags = [ fname[:-len('.conf')] ]
-            if (len(qotds) > 0):
-                quote, qauth = qotds.pop()
+        if (url is None):
+            continue
 
-            for tag in tags:
-                try:
-                    to_addrs = config.get ( 'tags', tag )
-                    to_addrs = to_addrs.split(',')
-                except:
-                    to_addrs = [ default_email_dest_addr ]
+        tags = [ fname[:-len('.conf')] ]
+        if (len(qotds) > 0):
+            quote, qauth = qotds.pop()
 
-                subject = u'[%s] from neatza app' % strftime("%Y-%m-%d", gmtime())
-                msg_text = (u'Random Quote Of The Day for %s\n%s\n%s' % (tag.title(), quote, qauth)) + \
-                           (u'\n\n%s' % ( url ) )
-                msg_html = (u'<div><b>Random Quote Of The Day for %s</b>' % (tag.title()) ) + \
-                           (u'<div style="margin-left: 30px; margin-top: 10px">') + \
-                           (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) ) + \
-                           (u'<br/><br/>') + \
-                           (u'<img src="%s" style="max-width: 700px" >' % ( url ) )
+        for tag in tags:
+            try:
+                to_addrs = config.get ( 'tags', tag )
+                to_addrs = to_addrs.split(',')
+            except:
+                to_addrs = [ default_email_dest_addr ]
 
-                to_addrs = set( to_addrs )
-                if (len(to_addrs) == 0 and default_email_dest_addr):
-                    to_addrs.add( default_email_dest_addr )
-                if (len(to_addrs) > 0):
-                    sendemail(from_addr    = email_addr,
-                              to_addr_list = list( to_addrs ),
-                              cc_addr_list = [], 
-                              subject      = subject,
-                              msg_text     = msg_text,
-                              msg_html     = msg_html,
-                              login        = email_addr, 
-                              password     = email_pass)
+            subject = u'[%s] from neatza app' % strftime("%Y-%m-%d", gmtime())
+            msg_text = (u'Random Quote Of The Day for %s\n%s\n%s' % (tag.title(), quote, qauth)) + \
+                       (u'\n\n%s' % ( url ) )
+            msg_html = (u'<div><b>Random Quote Of The Day for %s</b>' % (tag.title()) ) + \
+                       (u'<div style="margin-left: 30px; margin-top: 10px">') + \
+                       (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) ) + \
+                       (u'<br/><br/>') + \
+                       (u'<img src="%s" style="max-width: 700px" >' % ( url ) )
+
+            to_addrs = set( to_addrs )
+            if (len(to_addrs) == 0 and default_email_dest_addr):
+                to_addrs.add( default_email_dest_addr )
+            if (len(to_addrs) > 0):
+                sendemail(from_addr    = email_addr,
+                          to_addr_list = list( to_addrs ),
+                          cc_addr_list = [], 
+                          subject      = subject,
+                          msg_text     = msg_text,
+                          msg_html     = msg_html,
+                          login        = email_addr, 
+                          password     = email_pass)
 
 if __name__ == "__main__":
     log.basicConfig(filename = os.path.join( LOG_DIR, 'neatza_app.log' ),
