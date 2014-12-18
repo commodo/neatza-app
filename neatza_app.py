@@ -272,15 +272,6 @@ def main():
     email_pass = config.get( 'mail', 'password' )
     default_email_dest_addr = config.get ( 'mail', 'destination' )
 
-    try:
-        aliases_reverse_lookup = {}
-        aliases_names = config.get ( 'aliases', '__all__').split(',')
-        for alias_name in aliases_names:
-            target = config.get( 'aliases', alias_name )
-            aliases_reverse_lookup[target] = alias_name
-    except:
-        aliases_reverse_lookup = {}
-
     files_in_cnf_dir = os.listdir(CNF_DIR)
     random.shuffle( files_in_cnf_dir )
 
@@ -308,8 +299,6 @@ def main():
             if (len(qotds) > 0):
                 quote, qauth = qotds.pop()
 
-            if (tags[0] in aliases_reverse_lookup.keys()):
-                tags.append( aliases_reverse_lookup[ tags[0] ] )
             for tag in tags:
                 try:
                     to_addrs = config.get ( 'tags', tag )
