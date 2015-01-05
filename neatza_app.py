@@ -98,6 +98,7 @@ def valid_image(img_url):
         Image.open(f)
         return True
     except:
+        log.error("URL '%s' is not a valid image" % img_url)
         return False
 
 def extract_an_url(fname):
