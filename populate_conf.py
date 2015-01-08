@@ -17,7 +17,6 @@ files_in_scrapers_dir = os.listdir(SCRAPERS_DIR)
 
 for fname in files_in_scrapers_dir:
 
-    full_fname = os.path.join( CNF_DIR, fname )
     if (fname[:2] != '__' and fname.endswith('.py')):
         scrapers.append( fname[:-len('.py')] )
 
@@ -61,7 +60,7 @@ for key, files in sources.items():
             fname = files[ idx % len( files ) ]
             fname = os.path.join( CNF_DIR, fname + '.conf' )
             with open( fname, 'ab' ) as f:
-                f.write( img_url.strip() + '\n' )
+                f.write( '\n' + img_url.strip() )
             urls_cache.add ( cache_url.strip() )
             idx += 1
 
