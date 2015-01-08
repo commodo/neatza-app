@@ -124,7 +124,7 @@ def extract_an_url(fname):
     for url in urls:
         url = url.strip()
         if (url != ''):
-            if (valid_url is None) and (valid_image(url)):
+            if (valid_url is None):# and (valid_image(url)):
                 valid_url = url
             else:
                 new_urls.append(url)
