@@ -182,6 +182,31 @@ def _get_quotationspage_com_qotds():
 
     return qotds
 
+def _get_quotes_daddy():
+
+    qotd_url = "http://www.quotesdaddy.com/"
+
+    soup = BeautifulSoup( urllib.urlopen(qotd_url).read() )
+
+    divs = soup.findAll( 'div' )
+    quoteObjects = [ div for div in divs if div.get('class') and div['class'].find('quoteObject') > -1 ]
+    #;soup.findAll( 'div', attrs = { 'class' : 'quoteObject' } )
+
+    quote = qauth = None
+    qotds = []
+    idx = 0
+    for qObj in quoteObjects:
+        idx += 1
+        if (idx == 2):
+            continue
+        qauth = qObj.find( 'div', attrs = { 'class' : 'quoteAuthorName' } ) \
+                .text.replace('&nbsp;', ' ').strip()
+        quote = qObj.find( 'div', attrs = { 'class' : 'quoteText' } ) \
+                .text.replace('&nbsp;', ' ').strip().replace( '&rdquo;', '' ).replace( '&ldquo;', '' )
+        qotds.append( ( quote, qauth ) )
+
+    return qotds
+
 QOTD_SERVERS = [
     #( 'djxmmx.net',             17, 'Each Request'),
     #( 'qotd.nngn.net',          17, 'Daily'),
@@ -253,7 +278,7 @@ def get_qotds():
         The result is returned as a list of tuples of (quote_text, quote_author).
     """
     qotds = _get_quotationspage_com_qotds() + _get_eduro_com_qotds() + \
-            _get_goodreads_qotds()
+            _get_goodreads_qotds() + _get_quotes_daddy()
     for qotd_server_idx in range ( len ( QOTD_SERVERS ) ):
         qotd = _get_qotd_from_server ( qotd_server_idx )
         if (qotd is not None):
