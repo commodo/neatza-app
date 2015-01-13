@@ -290,6 +290,20 @@ def get_qotds():
 
     return (qotds)
 
+def _get_to_addrs(config, tag, default_dst_addr = None):
+
+    to_addrs = []
+    try:
+        to_addrs = config.get ( 'email_overrides', tag )
+        to_addrs = list( set( to_addrs.split(',') ) )
+    except:
+        to_addrs = []
+        if (default_dst_addr):
+            to_addrs.append(default_dst_addr)
+
+    return to_addrs
+
+
 def main():
     qotds = get_qotds()
 
@@ -298,7 +312,7 @@ def main():
 
     email_addr = config.get( 'mail', 'address' )
     email_pass = config.get( 'mail', 'password' )
-    default_email_dest_addr = config.get ( 'mail', 'destination' )
+    default_dst_addr = config.get ( 'mail', 'destination' )
 
     files_in_cnf_dir = os.listdir(CNF_DIR)
     random.shuffle( files_in_cnf_dir )
@@ -318,12 +332,6 @@ def main():
             quote, qauth = qotds.pop()
 
         for tag in tags:
-            try:
-                to_addrs = config.get ( 'email_overrides', tag )
-                to_addrs = to_addrs.split(',')
-            except:
-                to_addrs = [ default_email_dest_addr ]
-
             subject = u'[%s] from neatza app' % strftime("%Y-%m-%d", gmtime())
             msg_text = (u'Random Quote Of The Day for %s\n%s\n%s' % (tag.title(), quote, qauth)) + \
                        (u'\n\n%s' % ( url ) )
@@ -333,12 +341,10 @@ def main():
                        (u'<br/><br/>') + \
                        (u'<img src="%s" style="max-width: 700px" >' % ( url ) )
 
-            to_addrs = set( to_addrs )
-            if (len(to_addrs) == 0 and default_email_dest_addr):
-                to_addrs.add( default_email_dest_addr )
+            to_addrs = _get_to_addrs(config, tag, default_dst_addr)
             if (len(to_addrs) > 0):
                 sendemail(from_addr    = email_addr,
-                          to_addr_list = list( to_addrs ),
+                          to_addr_list = to_addrs,
                           cc_addr_list = [],
                           bcc_addr_list = [],
                           subject      = subject,
