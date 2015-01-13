@@ -342,16 +342,17 @@ def main():
                        (u'<img src="%s" style="max-width: 700px" >' % ( url ) )
 
             to_addrs = _get_to_addrs(config, tag, default_dst_addr)
-            if (len(to_addrs) > 0):
-                sendemail(from_addr    = email_addr,
-                          to_addr_list = to_addrs,
-                          cc_addr_list = [],
-                          bcc_addr_list = [],
-                          subject      = subject,
-                          msg_text     = msg_text,
-                          msg_html     = msg_html,
-                          login        = email_addr, 
-                          password     = email_pass)
+            if (len(to_addrs) == 0):
+                continue
+            sendemail(from_addr    = email_addr,
+                      to_addr_list = to_addrs,
+                      cc_addr_list = [],
+                      bcc_addr_list = [],
+                      subject      = subject,
+                      msg_text     = msg_text,
+                      msg_html     = msg_html,
+                      login        = email_addr, 
+                      password     = email_pass)
 
 if __name__ == "__main__":
     log.basicConfig(filename = os.path.join( LOG_DIR, 'neatza_app.log' ),
