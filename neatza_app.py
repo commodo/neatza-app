@@ -42,7 +42,7 @@ LOG_DIR = os.path.join( APP_DIR, 'log' )
 
 # When email fails https://support.google.com/mail/answer/14257
 
-def sendemail(from_addr, to_addr_list, cc_addr_list,
+def sendemail(from_addr, to_addr_list, cc_addr_list, bcc_addr_list,
               subject, msg_text, msg_html,
               login, password,
               smtpserver='smtp.gmail.com:587'):
@@ -51,6 +51,7 @@ def sendemail(from_addr, to_addr_list, cc_addr_list,
         from_addr -- The email address of the sender
         to_addr_list -- A list of destination email addresses
         cc_addr_list -- A list of CC destination email addresses
+        bcc_addr_list -- A list of BCC destination email addresses
         subject -- Subject of the email
         msg_text -- The email message in plain text format
         msg_html -- THe email message in HTML format
@@ -66,6 +67,7 @@ def sendemail(from_addr, to_addr_list, cc_addr_list,
     msg['From'] = from_addr
     msg['To'] = ','.join(to_addr_list)
     msg['Cc'] = ','.join(cc_addr_list)
+    msg['Bcc'] = ','.join(bcc_addr_list)
 
     # Record the MIME types of both parts - text/plain and text/html.
     part1 = MIMEText(unicode(msg_text).encode('utf-8'), 'plain')
@@ -337,7 +339,8 @@ def main():
             if (len(to_addrs) > 0):
                 sendemail(from_addr    = email_addr,
                           to_addr_list = list( to_addrs ),
-                          cc_addr_list = [], 
+                          cc_addr_list = [],
+                          bcc_addr_list = [],
                           subject      = subject,
                           msg_text     = msg_text,
                           msg_html     = msg_html,
