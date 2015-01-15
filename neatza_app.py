@@ -98,6 +98,8 @@ def valid_image(img_url):
         img_url -- The URL of the possible image.
     """
 
+    if (img_url is None or len(img_url) == 0):
+        return False
     try:
         f = cStringIO.StringIO(urllib.urlopen(img_url).read())
         Image.open(f)
@@ -117,25 +119,19 @@ def extract_an_url(fname):
     valid_url = None
     urls = []
 
-    fname = os.path.join(APP_DIR, fname)
-
     if (os.path.isfile(fname)):
         with open(fname, 'r') as f:
             urls = f.readlines()
 
     random.shuffle(urls)
 
-    new_urls = []
-    for url in urls:
-        url = url.strip()
-        if (url != ''):
-            if (valid_url is None):# and (valid_image(url)):
-                valid_url = url
-            else:
-                new_urls.append(url)
+    url = None
+    while (not valid_image(url) and (len(urls) > 0)):
+        url = urls.pop()
 
+    # will empty file if len(urls) == 0
     with open(fname, 'w') as f:
-        f.write('\n'.join(new_urls))
+        f.write('\n'.join(urls))
 
     return (valid_url)
 
