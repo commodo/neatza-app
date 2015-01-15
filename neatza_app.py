@@ -19,9 +19,9 @@ file is located and just let it run over a cron-job.
 """
 
 import bash
+import email1
 from qotds import get_qotds
 
-import smtplib
 from time import gmtime, strftime
 import os
 from PIL import Image
@@ -29,9 +29,6 @@ import urllib, cStringIO
 import random
 
 import logging as log
-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 import traceback
 
@@ -41,54 +38,6 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 CNF_DIR = os.path.join( APP_DIR, 'conf' )
 LOG_DIR = os.path.join( APP_DIR, 'log' )
 CACHE_DIR = os.path.join( APP_DIR, 'cache' )
-
-# When email fails https://support.google.com/mail/answer/14257
-
-def sendemail(from_addr, to_addr_list, cc_addr_list, bcc_addr_list,
-              subject, msg_text, msg_html,
-              login, password,
-              smtpserver='smtp.gmail.com:587'):
-    """ Sends an email to a set of recipients by using a SMTP sever
-
-        from_addr -- The email address of the sender
-        to_addr_list -- A list of destination email addresses
-        cc_addr_list -- A list of CC destination email addresses
-        bcc_addr_list -- A list of BCC destination email addresses
-        subject -- Subject of the email
-        msg_text -- The email message in plain text format
-        msg_html -- THe email message in HTML format
-        login -- Login username to an email server
-        password -- Password for the given username for login
-        smtpserver -- SMTP server to use to send emails; default is GMail's
-                      'smtp.gmail.com:587' address
-    """
-
-    # Create message container - the correct MIME type is multipart/alternative.
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = from_addr
-    msg['To'] = ','.join(to_addr_list)
-    msg['Cc'] = ','.join(cc_addr_list)
-    msg['Bcc'] = ','.join(bcc_addr_list)
-
-    # Record the MIME types of both parts - text/plain and text/html.
-    part1 = MIMEText(unicode(msg_text).encode('utf-8'), 'plain')
-    part2 = MIMEText(unicode(msg_html).encode('utf-8'), 'html')
-
-    # Attach parts into message container.
-    # According to RFC 2046, the last part of a multipart message, in this case
-    # the HTML message, is best and preferred.
-    msg.attach(part1)
-    msg.attach(part2)
- 
-    server = smtplib.SMTP(smtpserver)
-    server.ehlo()
-    server.starttls()
-    server.ehlo()
-    server.login(login, password)
-
-    server.sendmail(from_addr, to_addr_list, msg.as_string())
-    server.quit()
 
 def valid_image(img_url):
     """ Validates that the given URL is actually a valid image.
@@ -147,10 +96,9 @@ def _get_to_addrs(config, tag, default_dst_addr = None):
 
     return to_addrs
 
-def _send_neatza( tag, qotds, bash_data, img_url, to_addrs, email_data ):
+def _send_neatza( server, from_addr, tag, qotds, bash_data, img_url, to_addrs ):
 
     bash_fresh, bash_cache = bash_data
-    email_addr, email_pass = email_data
 
     if (len(qotds) > 0):
         quote, qauth = qotds.pop()
@@ -172,15 +120,12 @@ def _send_neatza( tag, qotds, bash_data, img_url, to_addrs, email_data ):
                (u'<br/><br/>') + \
                (u'<img src="%s" style="max-width: 700px" >' % ( img_url ) )
 
-    sendemail(from_addr    = email_addr,
-              to_addr_list = to_addrs,
-              cc_addr_list = [],
-              bcc_addr_list = [],
-              subject      = subject,
-              msg_text     = msg_text,
-              msg_html     = msg_html,
-              login        = email_addr,
-              password     = email_pass)
+    email1.send(server    = server,
+                from_addr = from_addr,
+                to_addrs  = to_addrs,
+                subject   = subject,
+                msg_text  = msg_text,
+                msg_html  = msg_html)
 
 def main():
     qotds = get_qotds()
@@ -190,7 +135,6 @@ def main():
 
     email_addr = config.get( 'mail', 'address' )
     email_pass = config.get( 'mail', 'password' )
-    email_data = ( email_addr, email_pass )
     default_dst_addr = config.get ( 'mail', 'destination' )
 
     files_in_cnf_dir = os.listdir(CNF_DIR)
@@ -198,6 +142,8 @@ def main():
     bash_cache = bash.get_cache()
     bash_fresh = bash.get_randoms()
     bash_data = (bash_fresh, bash_cache)
+
+    server = email1.get_server(email_addr, email_pass)
 
     for fname in files_in_cnf_dir:
         if (not fname.endswith('.conf')):
@@ -215,8 +161,9 @@ def main():
         if (url is None):
             log.warning("No image URL for '%s'", tag)
 
-        _send_neatza( tag, qotds, bash_data, url, to_addrs, email_data )
+        _send_neatza( server, email_addr, tag, qotds, bash_data, url, to_addrs )
 
+    server.quit()
     bash.save_cache (bash_cache)
 
 if __name__ == "__main__":
