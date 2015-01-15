@@ -328,7 +328,7 @@ def main():
         if (url is None):
             continue
 
-        tags = [ fname[:-len('.conf')] ]
+        tag = fname[:-len('.conf')]
         if (len(qotds) > 0):
             quote, qauth = qotds.pop()
         bash_text = ""
@@ -336,32 +336,31 @@ def main():
             bash_id, bash_text = bash_fresh.pop()
             bash_cache.add(bash_id)
 
-        for tag in tags:
-            subject = u'[%s] from neatza app' % strftime("%Y-%m-%d", gmtime())
-            msg_text = (u'Random Quote Of The Day for %s\n%s\n%s' % (tag.title(), quote, qauth)) + \
-                       (u'\n\nRandom Bash.Org\n%s' % bash_text) + \
-                       (u'\n\n%s' % ( url ) )
-            msg_html = (u'<div><b>Random Quote Of The Day for %s</b>' % (tag.title()) ) + \
-                       (u'<div style="margin-left: 30px; margin-top: 10px">') + \
-                       (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) ) + \
-                       (u'<br/><br/>') + \
-                       (u'<div><b>Random Bash.Org</b><br />') + \
-                       (u'%s</div>' % bash_text) + \
-                       (u'<br/><br/>') + \
-                       (u'<img src="%s" style="max-width: 700px" >' % ( url ) )
+        subject = u'[%s] from neatza app' % strftime("%Y-%m-%d", gmtime())
+        msg_text = (u'Random Quote Of The Day for %s\n%s\n%s' % (tag.title(), quote, qauth)) + \
+                   (u'\n\nRandom Bash.Org\n%s' % bash_text) + \
+                   (u'\n\n%s' % ( url ) )
+        msg_html = (u'<div><b>Random Quote Of The Day for %s</b>' % (tag.title()) ) + \
+                   (u'<div style="margin-left: 30px; margin-top: 10px">') + \
+                   (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) ) + \
+                   (u'<br/><br/>') + \
+                   (u'<div><b>Random Bash.Org</b><br />') + \
+                   (u'%s</div>' % bash_text) + \
+                   (u'<br/><br/>') + \
+                   (u'<img src="%s" style="max-width: 700px" >' % ( url ) )
 
-            to_addrs = _get_to_addrs(config, tag, default_dst_addr)
-            if (len(to_addrs) == 0):
-                continue
-            sendemail(from_addr    = email_addr,
-                      to_addr_list = to_addrs,
-                      cc_addr_list = [],
-                      bcc_addr_list = [],
-                      subject      = subject,
-                      msg_text     = msg_text,
-                      msg_html     = msg_html,
-                      login        = email_addr, 
-                      password     = email_pass)
+        to_addrs = _get_to_addrs(config, tag, default_dst_addr)
+        if (len(to_addrs) == 0):
+            continue
+        sendemail(from_addr    = email_addr,
+                  to_addr_list = to_addrs,
+                  cc_addr_list = [],
+                  bcc_addr_list = [],
+                  subject      = subject,
+                  msg_text     = msg_text,
+                  msg_html     = msg_html,
+                  login        = email_addr, 
+                  password     = email_pass)
         bash.save_cache (bash_cache)
 
 if __name__ == "__main__":
