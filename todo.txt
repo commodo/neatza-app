@@ -1,4 +1,3 @@
 Add http://faktsy.com/  support
 Add weather support
 Add pinterest.com + 500px.com scraper
-Add populate_conf script balance for conf files with fewer entries
