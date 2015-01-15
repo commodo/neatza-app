@@ -147,6 +147,40 @@ def _get_to_addrs(config, tag, default_dst_addr = None):
 
     return to_addrs
 
+def _send_neatza( tag, qotds, bash_data, img_url, to_addrs, email_data ):
+
+    bash_fresh, bash_cache = bash_data
+    email_addr, email_pass = email_data
+
+    if (len(qotds) > 0):
+        quote, qauth = qotds.pop()
+    bash_text = ""
+    if (len(bash_fresh) > 0):
+        bash_id, bash_text = bash_fresh.pop()
+        bash_cache.add(bash_id)
+
+    subject = u'[%s] from neatza app' % strftime("%Y-%m-%d", gmtime())
+    msg_text = (u'Random Quote Of The Day for %s\n%s\n%s' % (tag.title(), quote, qauth)) + \
+               (u'\n\nRandom Bash.Org\n%s' % bash_text) + \
+               (u'\n\n%s' % ( img_url ) )
+    msg_html = (u'<div><b>Random Quote Of The Day for %s</b>' % (tag.title()) ) + \
+               (u'<div style="margin-left: 30px; margin-top: 10px">') + \
+               (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) ) + \
+               (u'<br/><br/>') + \
+               (u'<div><b>Random Bash.Org</b><br />') + \
+               (u'%s</div>' % bash_text) + \
+               (u'<br/><br/>') + \
+               (u'<img src="%s" style="max-width: 700px" >' % ( img_url ) )
+
+    sendemail(from_addr    = email_addr,
+              to_addr_list = to_addrs,
+              cc_addr_list = [],
+              bcc_addr_list = [],
+              subject      = subject,
+              msg_text     = msg_text,
+              msg_html     = msg_html,
+              login        = email_addr,
+              password     = email_pass)
 
 def main():
     qotds = get_qotds()
@@ -156,57 +190,34 @@ def main():
 
     email_addr = config.get( 'mail', 'address' )
     email_pass = config.get( 'mail', 'password' )
+    email_data = ( email_addr, email_pass )
     default_dst_addr = config.get ( 'mail', 'destination' )
 
     files_in_cnf_dir = os.listdir(CNF_DIR)
     random.shuffle( files_in_cnf_dir )
     bash_cache = bash.get_cache()
     bash_fresh = bash.get_randoms()
+    bash_data = (bash_fresh, bash_cache)
 
     for fname in files_in_cnf_dir:
-
-        url = None
-        full_fname = os.path.join( CNF_DIR, fname )
-        if (fname.endswith('.conf')):
-            url = extract_an_url( full_fname )
-
-        if (url is None):
+        if (not fname.endswith('.conf')):
             continue
 
         tag = fname[:-len('.conf')]
-        if (len(qotds) > 0):
-            quote, qauth = qotds.pop()
-        bash_text = ""
-        if (len(bash_fresh) > 0):
-            bash_id, bash_text = bash_fresh.pop()
-            bash_cache.add(bash_id)
-
-        subject = u'[%s] from neatza app' % strftime("%Y-%m-%d", gmtime())
-        msg_text = (u'Random Quote Of The Day for %s\n%s\n%s' % (tag.title(), quote, qauth)) + \
-                   (u'\n\nRandom Bash.Org\n%s' % bash_text) + \
-                   (u'\n\n%s' % ( url ) )
-        msg_html = (u'<div><b>Random Quote Of The Day for %s</b>' % (tag.title()) ) + \
-                   (u'<div style="margin-left: 30px; margin-top: 10px">') + \
-                   (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) ) + \
-                   (u'<br/><br/>') + \
-                   (u'<div><b>Random Bash.Org</b><br />') + \
-                   (u'%s</div>' % bash_text) + \
-                   (u'<br/><br/>') + \
-                   (u'<img src="%s" style="max-width: 700px" >' % ( url ) )
 
         to_addrs = _get_to_addrs(config, tag, default_dst_addr)
         if (len(to_addrs) == 0):
             continue
-        sendemail(from_addr    = email_addr,
-                  to_addr_list = to_addrs,
-                  cc_addr_list = [],
-                  bcc_addr_list = [],
-                  subject      = subject,
-                  msg_text     = msg_text,
-                  msg_html     = msg_html,
-                  login        = email_addr, 
-                  password     = email_pass)
-        bash.save_cache (bash_cache)
+
+        full_fname = os.path.join( CNF_DIR, fname )
+        url = extract_an_url( full_fname )
+
+        if (url is None):
+            continue
+
+        _send_neatza( tag, qotds, bash_data, url, to_addrs, email_data )
+
+    bash.save_cache (bash_cache)
 
 if __name__ == "__main__":
     log.basicConfig(filename = os.path.join( LOG_DIR, 'neatza_app.log' ),
