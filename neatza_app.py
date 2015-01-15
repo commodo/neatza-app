@@ -213,7 +213,7 @@ def main():
         url = extract_an_url( full_fname )
 
         if (url is None):
-            continue
+            log.warning("No image URL for '%s'", tag)
 
         _send_neatza( tag, qotds, bash_data, url, to_addrs, email_data )
 
