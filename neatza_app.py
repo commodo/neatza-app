@@ -18,6 +18,8 @@ file is located and just let it run over a cron-job.
 
 """
 
+import bash
+
 import smtplib
 from time import gmtime, strftime
 import os
@@ -39,6 +41,7 @@ import ConfigParser
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 CNF_DIR = os.path.join( APP_DIR, 'conf' )
 LOG_DIR = os.path.join( APP_DIR, 'log' )
+CACHE_DIR = os.path.join( APP_DIR, 'cache' )
 
 # When email fails https://support.google.com/mail/answer/14257
 
@@ -316,6 +319,8 @@ def main():
 
     files_in_cnf_dir = os.listdir(CNF_DIR)
     random.shuffle( files_in_cnf_dir )
+    bash_cache = bash.get_cache()
+    bash_fresh = bash.get_randoms()
 
     for fname in files_in_cnf_dir:
 
@@ -330,14 +335,22 @@ def main():
         tags = [ fname[:-len('.conf')] ]
         if (len(qotds) > 0):
             quote, qauth = qotds.pop()
+        bash_text = ""
+        if (len(bash_fresh) > 0):
+            bash_id, bash_text = bash_fresh.pop()
+            bash_cache.add(bash_id)
 
         for tag in tags:
             subject = u'[%s] from neatza app' % strftime("%Y-%m-%d", gmtime())
             msg_text = (u'Random Quote Of The Day for %s\n%s\n%s' % (tag.title(), quote, qauth)) + \
+                       (u'\n\nRandom Bash.Org\n%s' % bash_text) + \
                        (u'\n\n%s' % ( url ) )
             msg_html = (u'<div><b>Random Quote Of The Day for %s</b>' % (tag.title()) ) + \
                        (u'<div style="margin-left: 30px; margin-top: 10px">') + \
                        (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) ) + \
+                       (u'<br/><br/>') + \
+                       (u'<div><b>Random Bash.Org</b><br />') + \
+                       (u'%s</div>' % bash_text) + \
                        (u'<br/><br/>') + \
                        (u'<img src="%s" style="max-width: 700px" >' % ( url ) )
 
@@ -353,6 +366,7 @@ def main():
                       msg_html     = msg_html,
                       login        = email_addr, 
                       password     = email_pass)
+        bash.save_cache (bash_cache)
 
 if __name__ == "__main__":
     log.basicConfig(filename = os.path.join( LOG_DIR, 'neatza_app.log' ),
