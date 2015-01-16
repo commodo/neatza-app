@@ -25,7 +25,8 @@ from qotds import get_qotds
 from time import gmtime, strftime
 import os
 from PIL import Image
-import urllib, cStringIO
+import requests
+import cStringIO
 import random
 
 import logging as log
@@ -49,7 +50,8 @@ def valid_image(img_url):
     if (img_url is None or len(img_url) == 0):
         return False
     try:
-        f = cStringIO.StringIO(urllib.urlopen(img_url).read())
+        r = requests.get(img_url)
+        f = cStringIO.StringIO(r.raw.read())
         Image.open(f)
         return True
     except:
