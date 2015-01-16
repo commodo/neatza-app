@@ -141,9 +141,7 @@ def main():
 
     files_in_cnf_dir = os.listdir(CNF_DIR)
     random.shuffle( files_in_cnf_dir )
-    bash_cache = bash.get_cache()
-    bash_fresh = bash.get_randoms()
-    bash_data = (bash_fresh, bash_cache)
+    bash_data = (bash.get_randoms(), bash.get_cache())
 
     server = email1.get_server(email_addr, email_pass)
 
@@ -166,7 +164,7 @@ def main():
         _send_neatza( server, email_addr, tag, qotds, bash_data, url, to_addrs )
 
     server.quit()
-    bash.save_cache (bash_cache)
+    bash.save_cache (bash_data[1])
 
 if __name__ == "__main__":
     log.basicConfig(filename = os.path.join( LOG_DIR, 'neatza_app.log' ),
