@@ -64,24 +64,26 @@ def extract_an_url(fname):
         fname -- The filename from which to extract the values.
     """
 
-    valid_url = None
     urls = []
 
     if (os.path.isfile(fname)):
         with open(fname, 'r') as f:
-            urls = f.readlines()
+            urls = [ url.strip() for url in f.readlines() ]
+            urls = [ url for url in urls if len(url) > 0 ]
 
     random.shuffle(urls)
 
     url = None
-    while (not valid_image(url) and (len(urls) > 0)):
+    while ((url is None) and (len(urls) > 0)):
         url = urls.pop()
+        if (not valid_image(url)):
+            url = None
 
     # will empty file if len(urls) == 0
     with open(fname, 'w') as f:
         f.write('\n'.join(urls))
 
-    return (valid_url)
+    return (url)
 
 def _get_to_addrs(config, tag, default_dst_addr = None):
 
