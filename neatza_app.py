@@ -35,6 +35,8 @@ import traceback
 
 import ConfigParser
 
+log.getLogger("requests").setLevel(log.WARNING)
+
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 CNF_DIR = os.path.join( APP_DIR, 'conf' )
 LOG_DIR = os.path.join( APP_DIR, 'log' )
