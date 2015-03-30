@@ -106,6 +106,7 @@ def _send_neatza( server, from_addr, tag, qotds, bash_data, img_url, to_addrs ):
 
     bash_fresh, bash_cache = bash_data
 
+    quote, qauth = "", ""
     if (len(qotds) > 0):
         quote, qauth = qotds.pop()
     bash_text = ""
