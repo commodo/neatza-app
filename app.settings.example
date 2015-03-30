@@ -2,8 +2,11 @@
 address=<email.addr>
 password=<email.pass-sorry-clear-text-for-now>
 destination=<destination.email.addr>
+[names]
+group1=<group-of-names1>
+group2=<group-of-names2>
 [email_overrides]
 tag1=<another_destintaion.email.addr>,<yet_another_destination.email.addr>
 [sources]
-<scraper_name1>=<conf_file1>,<conf_file2>
-<scraper_name2>=<conf_file3>,<conf_file4>
+group1=<scraper1_for_group1>,<scraper2_for_group1>
+group2=<scraper1_for_group2>,<scraper2_for_group2>
