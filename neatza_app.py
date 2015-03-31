@@ -18,6 +18,7 @@ file is located and just let it run over a cron-job.
 
 """
 
+import sys
 import bash
 import email1
 from qotds import get_qotds
@@ -35,6 +36,7 @@ import traceback
 
 import ConfigParser
 
+_g_dry_run = False
 log.getLogger("requests").setLevel(log.WARNING)
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -66,7 +68,6 @@ def extract_an_url(fname):
 
         fname -- The filename from which to extract the values.
     """
-
     urls = []
 
     if (os.path.isfile(fname)):
@@ -81,6 +82,9 @@ def extract_an_url(fname):
         url = urls.pop()
         if (not valid_image(url)):
             url = None
+
+    if (_g_dry_run):
+        return url
 
     # will empty file if len(urls) == 0
     with open(fname, 'w') as f:
@@ -100,7 +104,7 @@ def _get_url_for_name( sources, group ):
         if (source_group.get( s + '_used' )):
             continue
         module = __import__('scrapers.' + s, fromlist = [ 'get_url' ])
-        url = module.get_url()
+        _, url, _ = module.get_url()
         if (url):
             source_group[ s + '_used' ] = True
             return url
@@ -143,8 +147,8 @@ def _send_neatza( server, from_addr, tag, qotds, bash_data, img_url, to_addrs ):
 
     subject = u'[%s] from neatza app' % strftime("%Y-%m-%d", gmtime())
     msg_text = (u'Random Quote Of The Day for %s\n%s\n%s' % (tag.title(), quote, qauth)) + \
-               (u'\n\nRandom Bash.Org\n%s' % bash_text) + \
-               (u'\n\n%s' % ( img_url ) )
+               (u'\n\nRandom Bash.Org\n%s' % bash_text ) + \
+               (u'\n\n%s' % img_url )
     msg_html = (u'<div><b>Random Quote Of The Day for %s</b>' % (tag.title()) ) + \
                (u'<div style="margin-left: 30px; margin-top: 10px">') + \
                (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) ) + \
@@ -152,7 +156,10 @@ def _send_neatza( server, from_addr, tag, qotds, bash_data, img_url, to_addrs ):
                (u'<div><b>Random Bash.Org</b><br />') + \
                (u'%s</div>' % bash_text) + \
                (u'<br/><br/>') + \
-               (u'<img src="%s" style="max-width: 700px" >' % ( img_url ) )
+               (u'<img src="%s" style="max-width: 700px" >' % img_url )
+
+    if (_g_dry_run):
+        return
 
     email1.send(server    = server,
                 from_addr = from_addr,
@@ -188,6 +195,7 @@ def _build_group_map(config, section):
     return map_
 
 def main():
+
     qotds = get_qotds()
 
     # Read config file
@@ -211,7 +219,7 @@ def main():
     # Get a list of random IDs and the ones we've sent (and cached)
     bash_data = (bash.get_randoms(), bash.get_cache())
 
-    server = email1.get_server(email_addr, email_pass)
+    server = None if _g_dry_run else email1.get_server(email_addr, email_pass)
 
     for name in names:
 
@@ -226,13 +234,18 @@ def main():
 
         _send_neatza( server, email_addr, name, qotds, bash_data, url, to_addrs )
 
-    server.quit()
-    bash.save_cache (bash_data[1])
+    if (not _g_dry_run):
+        server.quit()
+        bash.save_cache (bash_data[1])
 
 if __name__ == "__main__":
-    log.basicConfig(filename = os.path.join( LOG_DIR, 'neatza_app.log' ),
-                    format   = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level    = log.INFO)
+    args = sys.argv[1:]
+    nolog = 'nolog' in args
+    _g_dry_run = 'dry-run' in args
+    if (not nolog):
+        log.basicConfig(filename = os.path.join( LOG_DIR, 'neatza_app.log' ),
+                        format   = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                        level    = log.INFO)
     try:
         main()
     except Exception as e:
