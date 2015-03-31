@@ -35,13 +35,13 @@ import logging as log
 import traceback
 
 import ConfigParser
+from utils import cache_load, cache_save
 
 _g_dry_run = False
 log.getLogger("requests").setLevel(log.WARNING)
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_DIR = os.path.join( APP_DIR, 'log' )
-CACHE_DIR = os.path.join( APP_DIR, 'cache' )
 
 def valid_image(img_url):
     """ Validates that the given URL is actually a valid image.
@@ -68,12 +68,7 @@ def extract_an_url(fname):
 
         fname -- The filename from which to extract the values.
     """
-    urls = []
-
-    if (os.path.isfile(fname)):
-        with open(fname, 'r') as f:
-            urls = [ url.strip() for url in f.readlines() ]
-            urls = [ url for url in urls if len(url) > 0 ]
+    urls = cache_load( fname )
 
     random.shuffle(urls)
 
@@ -87,8 +82,7 @@ def extract_an_url(fname):
         return url
 
     # will empty file if len(urls) == 0
-    with open(fname, 'w') as f:
-        f.write('\n'.join(urls))
+    cache_save( fname, urls )
 
     return (url)
 
@@ -110,7 +104,7 @@ def _get_url_for_name( sources, group ):
             return url
 
     for s in source_group['sources']:
-        url = extract_an_url( os.path.join( CACHE_DIR, s ) )
+        url = extract_an_url( s )
         if (url):
             return url
 

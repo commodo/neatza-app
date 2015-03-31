@@ -2,31 +2,13 @@
 import os
 import urllib
 from BeautifulSoup import BeautifulSoup
-
-APP_DIR = os.path.dirname(os.path.abspath(__file__))
-CACHE_DIR = os.path.join( APP_DIR, 'cache' )
-
+from utils import cache_load, cache_save
 
 def get_cache():
-
-    bash_cache = set()
-
-    bash_cache_file = os.path.join( CACHE_DIR, 'bash' )
-    if (os.path.exists( bash_cache_file )):
-        with open( bash_cache_file, 'r' ) as f:
-            bash_cache = set ( [ int(i) for i in  set( f.read().split(',') ) ] )
-
-    return bash_cache
+    return  set( [ int(i) for i in cache_load( 'bash', sep = ',' ) ] )
 
 def save_cache( bash_cache ):
-
-    if (len(bash_cache) == 0):
-        return
-
-    bash_cache_file = os.path.join( CACHE_DIR, 'bash' )
-    with open( bash_cache_file, 'w' ) as f:
-        bash_cache = [ str(i) for i in bash_cache ]
-        f.write( ','.join( bash_cache) )
+    cache_save( 'bash', bash_cache, sep = ',' )
 
 def get_randoms( bash_cache = None):
 
