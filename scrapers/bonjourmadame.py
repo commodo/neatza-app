@@ -24,7 +24,8 @@ def get_url( from_url = "http://www.bonjourmadame.fr/" ):
         if ( img_elem ):
             img_url = img_elem['src']
 
-    return (cache_key_url, img_url)
+    # No rating for this
+    return (cache_key_url, img_url, None)
 
 def get_urls( from_page = 1, to_page = None, parallel = True, urls_cache = None):
     from_url = "http://www.bonjourmadame.fr/page/%d"
