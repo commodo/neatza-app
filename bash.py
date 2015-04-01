@@ -5,7 +5,7 @@ from BeautifulSoup import BeautifulSoup
 from utils import cache_load, cache_save
 
 def get_cache():
-    return  set( [ int(i) for i in cache_load( 'bash', sep = ',' ) ] )
+    return  set( cache_load( 'bash', sep = ',' ) )
 
 def save_cache( bash_cache ):
     cache_save( 'bash', bash_cache, sep = ',' )
@@ -20,7 +20,7 @@ def get_randoms( bash_cache = None):
     qs = soup.findAll( 'p', attrs = { 'class' : 'quote' }  )
     for q in qs:
         qi = q.text[1:]
-        qi = int(qi[:qi.find('+')])
+        qi = str(int(qi[:qi.find('+')]))
         if ((bash_cache is None) or (qi not in bash_cache)):
             r.append( (qi, str(q.nextSibling) ))
     return r

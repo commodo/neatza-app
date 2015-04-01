@@ -213,7 +213,8 @@ def main():
     random.shuffle( names )
 
     # Get a list of random IDs and the ones we've sent (and cached)
-    bash_data = (bash.get_randoms(), bash.get_cache())
+    bash_cache = bash.get_cache()
+    bash_data  = (bash.get_randoms( bash_cache ), bash_cache)
 
     server = None if _g_dry_run else email1.get_server(email_addr, email_pass)
 
