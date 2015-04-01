@@ -239,10 +239,9 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     nolog = 'nolog' in args
     _g_dry_run = 'dry-run' in args
-    if (not nolog):
-        log.basicConfig(filename = os.path.join( LOG_DIR, 'neatza_app.log' ),
-                        format   = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        level    = log.INFO)
+    log.basicConfig(filename = None if nolog else os.path.join( LOG_DIR, 'neatza_app.log' ),
+                    format   = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level    = log.INFO)
     try:
         main()
     except Exception as e:
