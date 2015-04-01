@@ -1,6 +1,7 @@
 
 import urllib
 from BeautifulSoup import BeautifulSoup
+import logging as log
 
 def get_url( from_url = "http://www.bonjourmadame.fr/" ):
 
@@ -19,10 +20,9 @@ def get_url( from_url = "http://www.bonjourmadame.fr/" ):
         if ( img_elem ):
             img_url = img_elem['src']
 
-    # No rating for this
-    return (cache_key_url, img_url, None)
+    return (cache_key_url, img_url)
 
-def get_urls( from_page = 1, to_page = None, parallel = True, urls_cache = None):
+def get_urls( from_page = 1, to_page = None, cache = None):
     from_url = "http://www.bonjourmadame.fr/page/%d"
 
     curr_page = from_page
@@ -33,10 +33,10 @@ def get_urls( from_page = 1, to_page = None, parallel = True, urls_cache = None)
     result = get_url( from_url % curr_page  )
     keep_going = (result[0] is not None) and (result[1] is not None)
     while ( keep_going and ((to_page is None) or (curr_page <= to_page)) ):
-        print result
+        log.info( str( result ) )
         cache_url, _ = result
-        if (urls_cache and (cache_url in urls_cache)):
-            print "  URL '%s' found in cache. Stopping..." % cache_url
+        if (cache and (cache_url in cache)):
+            log.info( "  URL '%s' found in cache. Stopping..." % cache_url )
             break
         else:
             urls.append( result )

@@ -86,27 +86,28 @@ def extract_an_url(fname):
 
     return (url)
 
-def _get_url_for_name( sources, group ):
+def _get_url_for_name( sources_list ):
 
-    if (group not in sources):
-        return
-    source_group = sources[group]
-
-    src = None
-    url = None
-    for s in source_group['sources']:
-        if (source_group.get( s + '_used' )):
-            continue
-        module = __import__('scrapers.' + s, fromlist = [ 'get_url' ])
-        _, url, _ = module.get_url()
-        if (url):
-            source_group[ s + '_used' ] = True
-            return url
-
-    for s in source_group['sources']:
-        url = extract_an_url( s )
+    for s in sources_list:
+        url = extract_an_url( s + '.send' )
         if (url):
             return url
+
+def _update_sources( sources ):
+
+    for slist in sources.values():
+        for s in slist:
+            cache_scraped = cache_load( s )
+            cache_send    = cache_load( s + '.send' )
+            module = __import__('scrapers.' + s, fromlist = [ 'get_urls' ])
+            urls = module.get_urls( cache = cache_scraped )
+            for cache_url, img_url in urls:
+                cache_scraped.append( cache_url )
+                cache_send.append( img_url )
+            if (not _g_dry_run):
+                cache_save( s , cache_scraped )
+                cache_save( s + '.send', cache_send )        
+
 
 def _get_to_addrs(config, tag, default_dst_addr = None):
 
@@ -181,8 +182,7 @@ def _build_group_map(config, section):
     for i in range(1,9999):
         try:
             id_ = 'group%d' % i
-            names = [ n.strip() for n in config.get ( section, id_ ).split(',') ]
-            map_[id_] = { section : names }
+            map_[id_] = [ n.strip() for n in config.get ( section, id_ ).split(',') ]
         except:
             break
 
@@ -206,6 +206,8 @@ def main():
     names_map = _build_group_reverse_map( config, 'names' )
     sources   = _build_group_map( config, 'sources' )
 
+    _update_sources( sources )
+
     # Get the names into a list and shuffle them
     names = list(names_map.keys())
     random.shuffle( names )
@@ -221,7 +223,7 @@ def main():
         if (len(to_addrs) == 0):
             continue
 
-        url = _get_url_for_name( sources, names_map[name] )
+        url = _get_url_for_name( sources[ names_map[name] ] )
 
         if (url is None):
             log.warning("No image URL for '%s'", name)
