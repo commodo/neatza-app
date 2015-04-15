@@ -1,7 +1,7 @@
 
 import os
 import urllib
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 from utils import cache_load, cache_save
 
 def get_cache():

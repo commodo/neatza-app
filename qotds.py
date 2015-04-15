@@ -2,7 +2,7 @@
 import urllib
 import random
 import socket
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 def _get_eduro_com_qotds():
     """ Retrieve Quote Of The Day from eduro.com.
