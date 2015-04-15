@@ -39,7 +39,6 @@ def get_urls( from_page = 1, to_page = None, cache = None):
                 log.info( "  URL '%s' found in cache. Stopping..." % blog_url )
                 break
             for img_url in get_blog_entry_urls(blog_url):
-                print img_url
                 log.info( img_url )
                 urls.append( ( blog_url, img_url ) )
 
