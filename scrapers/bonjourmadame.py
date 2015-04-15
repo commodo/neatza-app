@@ -1,6 +1,6 @@
 
 import urllib
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import logging as log
 
 def get_url( from_url = "http://www.bonjourmadame.fr/" ):

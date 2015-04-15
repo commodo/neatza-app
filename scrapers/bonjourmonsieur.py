@@ -1,7 +1,7 @@
 
 import urllib
 from urlparse import urljoin
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import logging as log
 
 def get_url( from_url = "http://www.bonjourmonsieur.fr/", base_url = "http://www.bonjourmonsieur.fr/" ):
