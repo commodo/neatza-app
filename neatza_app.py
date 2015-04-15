@@ -68,7 +68,7 @@ def extract_an_url(fname):
 
         fname -- The filename from which to extract the values.
     """
-    urls = cache_load( fname )
+    urls = cache_load( fname + '.send' )
 
     random.shuffle(urls)
 
@@ -80,9 +80,11 @@ def extract_an_url(fname):
 
     if (_g_dry_run):
         return url
+    urls_sent = cache_load( fname + '.sent' )
+    urls_sent.add( url )
 
-    # will empty file if len(urls) == 0
-    cache_save( fname, urls )
+    cache_save( fname + '.send', urls )
+    cache_save( fname + '.sent', urls_sent )
 
     return (url)
 
@@ -222,7 +224,7 @@ def main():
         if (len(to_addrs) == 0):
             continue
 
-        url = extract_an_url( names_map[name] + '.send' )
+        url = extract_an_url( names_map[name] )
 
         if (url is None):
             log.warning("No image URL for '%s'", name)
