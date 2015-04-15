@@ -13,11 +13,11 @@ def sanitize_url( url ):
 
 def cache_load( url, sep = '\n'):
 
-    cache = []
+    cache = set()
     cache_file = os.path.join( CACHE_DIR, sanitize_url(url) )
     if (os.path.isfile ( cache_file ) ):
         with open( cache_file, 'rb' ) as f:
-            cache = [ l.strip() for l in  f.read().split(sep) ]
+            cache = set( [ l.strip() for l in  f.read().split(sep) ] )
 
     return cache
 

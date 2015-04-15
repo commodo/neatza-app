@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from utils import cache_load, cache_save
 
 def get_cache():
-    return  set( cache_load( 'bash', sep = ',' ) )
+    return cache_load( 'bash', sep = ',' )
 
 def save_cache( bash_cache ):
     cache_save( 'bash', bash_cache, sep = ',' )

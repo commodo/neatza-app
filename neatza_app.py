@@ -102,8 +102,8 @@ def _update_sources( sources ):
             module = __import__('scrapers.' + s, fromlist = [ 'get_urls' ])
             urls = module.get_urls( cache = cache_scraped )
             for cache_url, img_url in urls:
-                cache_scraped.append( cache_url )
-                cache_send.append( img_url )
+                cache_scraped.add( cache_url )
+                cache_send.add( img_url )
             if (not _g_dry_run):
                 cache_save( s , cache_scraped )
                 cache_save( s + '.send', cache_send )        
