@@ -58,9 +58,7 @@ def _get_quotes_daddy():
 
     soup = BeautifulSoup( urllib.urlopen(qotd_url).read() )
 
-    divs = soup.findAll( 'div' )
-    quoteObjects = [ div for div in divs if div.get('class') and div['class'].find('quoteObject') > -1 ]
-    #;soup.findAll( 'div', attrs = { 'class' : 'quoteObject' } )
+    quoteObjects = soup.findAll( 'div', attrs = { 'class' : 'quoteObject' } )
 
     quote = qauth = None
     qotds = []
@@ -138,7 +136,7 @@ def _get_goodreads_qotds():
     for quoteText in quoteTexts:
         qts = quoteText.text.split('&#8213;')
         quote = qts[0].replace('&ldquo;','').replace('&rdquo;','')
-        qauth = qts[1]
+        qauth = qts[1] if len(qts) > 1 else ''
         qotds.append( (quote, qauth) )
 
     return qotds
