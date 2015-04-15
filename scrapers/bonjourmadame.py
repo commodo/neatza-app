@@ -1,4 +1,7 @@
 
+import sys
+sys.path.append('..')
+
 import urllib
 from bs4 import BeautifulSoup
 import logging as log

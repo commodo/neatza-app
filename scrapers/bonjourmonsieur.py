@@ -1,4 +1,7 @@
 
+import sys
+sys.path.append('..')
+
 import urllib
 from urlparse import urljoin
 from bs4 import BeautifulSoup
