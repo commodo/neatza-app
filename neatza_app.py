@@ -86,19 +86,12 @@ def extract_an_url(fname):
 
     return (url)
 
-def _get_url_for_name( sources_list ):
-
-    for s in sources_list:
-        url = extract_an_url( s + '.send' )
-        if (url):
-            return url
-
 def _update_sources( sources ):
 
-    for slist in sources.values():
+    for key, slist in sources.items():
         for s in slist:
             cache_scraped = cache_load( s )
-            cache_send    = cache_load( s + '.send' )
+            cache_send    = cache_load( key + '.send' )
             module = __import__('scrapers.' + s, fromlist = [ 'get_urls' ])
             urls = module.get_urls( cache = cache_scraped )
             for cache_url, img_url in urls:
@@ -106,7 +99,7 @@ def _update_sources( sources ):
                 cache_send.add( img_url )
             if (not _g_dry_run):
                 cache_save( s , cache_scraped )
-                cache_save( s + '.send', cache_send )        
+                cache_save( key + '.send', cache_send )
 
 
 def _get_to_addrs(config, tag, default_dst_addr = None):
@@ -224,7 +217,7 @@ def main():
         if (len(to_addrs) == 0):
             continue
 
-        url = _get_url_for_name( sources[ names_map[name] ] )
+        url = extract_an_url( names_map[name] + '.send' )
 
         if (url is None):
             log.warning("No image URL for '%s'", name)
