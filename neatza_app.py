@@ -92,14 +92,19 @@ def _update_sources( sources ):
         for s in slist:
             cache_scraped = cache_load( s )
             cache_send    = cache_load( key + '.send' )
-            module = __import__('scrapers.' + s, fromlist = [ 'get_urls' ])
+            cache_moderate = cache_load( key + '.moderate' )
+            module = __import__('scrapers.' + s, fromlist = [ 'get_urls', 'requires_moderation' ])
             urls = module.get_urls( cache = cache_scraped )
             for cache_url, img_url in urls:
                 cache_scraped.add( cache_url )
-                cache_send.add( img_url )
+                if (module.requires_moderation()):
+                    cache_moderate.add( img_url )
+                else:
+                    cache_send.add( img_url )
             if (not _g_dry_run):
                 cache_save( s , cache_scraped )
                 cache_save( key + '.send', cache_send )
+                cache_save( key + '.moderate', cache_moderate )
 
 
 def _get_to_addrs(config, tag, default_dst_addr = None):

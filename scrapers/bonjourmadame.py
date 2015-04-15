@@ -6,6 +6,9 @@ import urllib
 from bs4 import BeautifulSoup
 import logging as log
 
+def requires_moderation():
+    return False
+
 def get_url( from_url = "http://www.bonjourmadame.fr/" ):
 
     soup = BeautifulSoup( urllib.urlopen(from_url).read() )

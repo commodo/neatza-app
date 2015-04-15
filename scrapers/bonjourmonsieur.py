@@ -7,6 +7,9 @@ from urlparse import urljoin
 from bs4 import BeautifulSoup
 import logging as log
 
+def requires_moderation():
+    return False
+
 def get_url( from_url = "http://www.bonjourmonsieur.fr/", base_url = "http://www.bonjourmonsieur.fr/" ):
 
     soup = BeautifulSoup( urllib.urlopen(from_url).read() )
