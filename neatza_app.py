@@ -35,7 +35,7 @@ import logging as log
 import traceback
 
 import ConfigParser
-from utils import cache_load, cache_save
+from utils import cache_load, cache_save, ensure_dir
 
 _g_dry_run = False
 log.getLogger("requests").setLevel(log.WARNING)
@@ -236,6 +236,7 @@ def main():
         bash.save_cache (bash_data[1])
 
 if __name__ == "__main__":
+    ensure_dir(LOG_DIR)
     args = sys.argv[1:]
     nolog = 'nolog' in args
     _g_dry_run = 'dry-run' in args
