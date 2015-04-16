@@ -68,7 +68,7 @@ def extract_an_url(fname):
 
         fname -- The filename from which to extract the values.
     """
-    urls = cache_load( fname + '.send' )
+    urls = list( cache_load( fname + '.send' ) )
 
     random.shuffle(urls)
 
