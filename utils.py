@@ -15,6 +15,7 @@ def app_prep(log_file):
 
     nolog = 'nolog' in sys.argv[1:]
     if (nolog):
+        log.getLogger().setLevel(log.INFO)
         return
     ensure_dir(LOG_DIR)
     log.basicConfig(filename = None if nolog else os.path.join( LOG_DIR, log_file ),
