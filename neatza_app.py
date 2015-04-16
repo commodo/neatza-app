@@ -35,13 +35,12 @@ import logging as log
 import traceback
 
 import ConfigParser
-from utils import cache_load, cache_save, ensure_dir
+from utils import cache_load, cache_save, app_prep
 
 _g_dry_run = False
 log.getLogger("requests").setLevel(log.WARNING)
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
-LOG_DIR = os.path.join( APP_DIR, 'log' )
 
 def valid_image(img_url):
     """ Validates that the given URL is actually a valid image.
@@ -87,27 +86,6 @@ def extract_an_url(fname):
     cache_save( fname + '.sent', urls_sent )
 
     return (url)
-
-def _update_sources( sources ):
-
-    for key, slist in sources.items():
-        for s in slist:
-            cache_scraped = cache_load( s )
-            cache_send    = cache_load( key + '.send' )
-            cache_moderate = cache_load( key + '.moderate' )
-            module = __import__('scrapers.' + s, fromlist = [ 'get_urls', 'requires_moderation' ])
-            urls = module.get_urls( cache = cache_scraped )
-            for cache_url, img_url in urls:
-                cache_scraped.add( cache_url )
-                if (module.requires_moderation()):
-                    cache_moderate.add( img_url )
-                else:
-                    cache_send.add( img_url )
-            if (not _g_dry_run):
-                cache_save( s , cache_scraped )
-                cache_save( key + '.send', cache_send )
-                cache_save( key + '.moderate', cache_moderate )
-
 
 def _get_to_addrs(config, tag, default_dst_addr = None):
 
@@ -206,8 +184,6 @@ def main():
     names_map = _build_group_reverse_map( config, 'names' )
     sources   = _build_group_map( config, 'sources' )
 
-    _update_sources( sources )
-
     # Get the names into a list and shuffle them
     names = list(names_map.keys())
     random.shuffle( names )
@@ -236,13 +212,8 @@ def main():
         bash.save_cache (bash_data[1])
 
 if __name__ == "__main__":
-    ensure_dir(LOG_DIR)
-    args = sys.argv[1:]
-    nolog = 'nolog' in args
-    _g_dry_run = 'dry-run' in args
-    log.basicConfig(filename = None if nolog else os.path.join( LOG_DIR, 'neatza_app.log' ),
-                    format   = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level    = log.INFO)
+    _g_dry_run = 'dry-run' in sys.argv[1:]
+    app_prep( 'neatza_app.log' )
     try:
         main()
     except Exception as e:

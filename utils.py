@@ -1,12 +1,25 @@
 
 import os
+import sys
+import logging as log
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 CACHE_DIR = os.path.join( APP_DIR, 'cache' )
+LOG_DIR = os.path.join( APP_DIR, 'log' )
 
 def ensure_dir( dirname ):
     if (not os.path.isdir( dirname )):
         os.makedirs( dirname )
+
+def app_prep(log_file):
+
+    nolog = 'nolog' in sys.argv[1:]
+    if (nolog):
+        return
+    ensure_dir(LOG_DIR)
+    log.basicConfig(filename = None if nolog else os.path.join( LOG_DIR, log_file ),
+                    format   = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level    = log.INFO)
 
 def sanitize_url( url ):
     return url.replace('http://', '').replace('https://', '').replace('/', '_')
