@@ -43,6 +43,8 @@ def get_urls( from_page = 1, to_page = None, cache = None):
                 urls.append( ( blog_url, img_url ) )
 
         curr_page += 1
+        if (curr_page == to_page):
+            break
 
     return (urls)
 
