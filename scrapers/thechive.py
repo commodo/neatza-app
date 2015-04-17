@@ -17,7 +17,7 @@ def get_blog_entry_urls( blog_entry_url ):
     return [ img['src'] for img in imgs ]
 
 
-def get_urls( from_page = 1, to_page = None, cache = None):
+def update_urls( cache_to_compare, cache_to_update, from_page = 1, to_page = None ):
     base_url = "http://thechive.com/category/girls/page/%d"
 
     curr_page = from_page
@@ -34,18 +34,17 @@ def get_urls( from_page = 1, to_page = None, cache = None):
         blog_urls = [ u.find( 'a' )['href'] for u in blog_urls ]
 
         for blog_url in blog_urls:
-            if (cache and (blog_url in cache)):
+            if (cache_to_compare and (blog_url in cache_to_compare)):
                 keep_going = False
                 log.info( "  URL '%s' found in cache. Stopping..." % blog_url )
                 break
             for img_url in get_blog_entry_urls(blog_url):
                 log.info( img_url )
-                urls.append( ( blog_url, img_url ) )
+                if (cache_to_compare):
+                    cache_to_compare.add( blog_url )
+                cache_to_update.add( img_url )
 
         curr_page += 1
         if (curr_page == to_page):
             break
 
-    return (urls)
-
-get_urls()

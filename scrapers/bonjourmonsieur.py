@@ -35,22 +35,21 @@ def get_url( from_url = "http://www.bonjourmonsieur.fr/", base_url = "http://www
 
     return (img_url, next_url, rating)
 
-def get_urls( min_rating = 7.00, cache = None ):
+def update_urls( cache_to_compare, cache_to_update, min_rating = 7.00 ):
     from_url = "http://www.bonjourmonsieur.fr/"
 
     idx = 1
-    urls = []
     img_url, next_url, rating = get_url( from_url )
     while ( next_url ):
         log.info( str(( idx, '---', next_url, img_url )) )
-        if (cache and (next_url in cache)):
+        if (cache_to_compare and (next_url in cache_to_compare)):
             log.info( str(( "  URL '%s' found in cache. Stopping..." % next_url )) )
             break
         if (min_rating <= rating):
-            urls.append( (from_url, img_url) )
+            if (cache_to_compare):
+                cache_to_compare.add( from_url )
+            cache_to_update.add( img_url )
         from_url = next_url
         img_url, next_url, rating = get_url( next_url )
         idx += 1
-
-    return (urls)
 

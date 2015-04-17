@@ -28,27 +28,27 @@ def get_url( from_url = "http://www.bonjourmadame.fr/" ):
 
     return (cache_key_url, img_url)
 
-def get_urls( from_page = 1, to_page = None, cache = None):
+def update_urls( cache_to_compare, cache_to_update, from_page = 1, to_page = None):
     from_url = "http://www.bonjourmadame.fr/page/%d"
 
     curr_page = from_page
     if (to_page is None):
         to_page = 999999999
 
-    urls = []
-    result = get_url( from_url % curr_page  )
-    keep_going = (result[0] is not None) and (result[1] is not None)
-    while ( keep_going and ((to_page is None) or (curr_page <= to_page)) ):
-        log.info( str( result ) )
-        cache_url, _ = result
-        if (cache and (cache_url in cache)):
+    cache_url, img_url = get_url( from_url % curr_page  )
+    keep_going = (cache_url is not None) and (img_url is not None)
+    while ( keep_going and curr_page <= to_page ):
+        log.info( str( ( cache_url, img_url ) ) )
+        if (cache_to_compare and (cache_url in cache_to_compare)):
             log.info( "  URL '%s' found in cache. Stopping..." % cache_url )
             break
         else:
-            urls.append( result )
-        curr_page += 1
-        result = get_url( from_url % curr_page )
-        keep_going = (result[0] is not None) and (result[1] is not None)
+            if ( cache_to_compare ):
+                cache_to_compare.add( cache_url )
+            cache_to_update.add( img_url )
 
-    return (urls)
+        curr_page += 1
+
+        cache_url, img_url = get_url( from_url % curr_page )
+        keep_going = (cache_url is not None) and (img_url is not None)
 

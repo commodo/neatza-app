@@ -5,7 +5,6 @@
 import sys
 
 import os
-import requests
 
 import logging as log
 
@@ -24,21 +23,22 @@ def _update_sources( sources ):
 
     for key, slist in sources.items():
         for s in slist:
-            cache_scraped = cache_load( s )
-            cache_send    = cache_load( key + '.send' )
-            cache_moderate = cache_load( key + '.moderate' )
+            cache_to_compare = cache_load( s )
             module = __import__('scrapers.' + s, fromlist = [ 'get_urls', 'requires_moderation' ])
-            urls = module.get_urls( cache = cache_scraped )
-            for cache_url, img_url in urls:
-                cache_scraped.add( cache_url )
-                if (module.requires_moderation()):
-                    cache_moderate.add( img_url )
-                else:
-                    cache_send.add( img_url )
+            if (module.requires_moderation()):
+                cache_to_update = cache_load( key + '.moderate' )
+            else:
+                cache_to_update = cache_load( key + '.send' )
+            if (_g_dry_run):
+                cache_to_compare._file = None
+                cache_to_update._file = None
+
+            module.update_urls( cache_to_compare, cache_to_update )
+
             if (not _g_dry_run):
-                cache_save( cache_scraped )
-                cache_save( cache_send )
-                cache_save( cache_moderate )
+                cache_save( cache_to_compare )
+                cache_save( cache_to_update )
+
 
 def _build_group_map(config, section):
     map_ = {}
