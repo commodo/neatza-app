@@ -39,12 +39,11 @@ def update_urls( cache_to_compare, cache_to_update, from_page = 1, to_page = Non
     keep_going = (cache_url is not None) and (img_url is not None)
     while ( keep_going and curr_page <= to_page ):
         log.info( str( ( cache_url, img_url ) ) )
-        if (cache_to_compare and (cache_url in cache_to_compare)):
+        if (cache_url in cache_to_compare):
             log.info( "  URL '%s' found in cache. Stopping..." % cache_url )
             break
         else:
-            if ( cache_to_compare ):
-                cache_to_compare.add( cache_url )
+            cache_to_compare.add( cache_url )
             cache_to_update.add( img_url )
 
         curr_page += 1
