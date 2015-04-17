@@ -82,8 +82,8 @@ def extract_an_url(fname):
     urls_sent = cache_load( fname + '.sent' )
     urls_sent.add( url )
 
-    cache_save( fname + '.send', urls )
-    cache_save( fname + '.sent', urls_sent )
+    cache_save( urls )
+    cache_save( urls_sent )
 
     return (url)
 

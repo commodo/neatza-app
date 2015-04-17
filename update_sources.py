@@ -36,9 +36,9 @@ def _update_sources( sources ):
                 else:
                     cache_send.add( img_url )
             if (not _g_dry_run):
-                cache_save( s , cache_scraped )
-                cache_save( key + '.send', cache_send )
-                cache_save( key + '.moderate', cache_moderate )
+                cache_save( cache_scraped )
+                cache_save( cache_send )
+                cache_save( cache_moderate )
 
 def _build_group_map(config, section):
     map_ = {}

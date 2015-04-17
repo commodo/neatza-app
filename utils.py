@@ -27,21 +27,28 @@ def sanitize_url( url ):
 
 def cache_load( url, sep = '\n'):
 
-    cache = set()
+    class cache_object(set):
+        def __init__(self, *args, **kw_args):
+            set.__init__( self, *args, **kw_args )
+            self._file = None
+
+    cache = cache_object()
     cache_file = os.path.join( CACHE_DIR, sanitize_url(url) )
     if (os.path.isfile ( cache_file ) ):
         with open( cache_file, 'rb' ) as f:
-            cache = set( [ l.strip() for l in  f.read().split(sep) ] )
+            cache = cache_object( [ l.strip() for l in  f.read().split(sep) ] )
+    cache._file = cache_file
 
     return cache
 
-def cache_save( url, cache, sep = '\n' ):
+def cache_save( cache, sep = '\n' ):
+
+    if (cache._file is None):
+        return
 
     if (len(cache) == 0):
         return
 
     ensure_dir( CACHE_DIR )
-    cache_file = os.path.join( CACHE_DIR, sanitize_url(url) )
-    if (cache and len(cache) > 0):
-        with open( cache_file, 'wb' ) as f:
-            f.write( sep.join(cache) )
+    with open( cache._file, 'wb' ) as f:
+        f.write( sep.join(cache) )
