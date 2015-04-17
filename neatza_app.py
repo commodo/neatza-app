@@ -37,7 +37,7 @@ import traceback
 import ConfigParser
 from utils import cache_object, app_prep
 
-sys.setdefaultencoding('utf8')
+sys.setdefaultencoding('utf-8')
 
 _g_dry_run = False
 log.getLogger("requests").setLevel(log.WARNING)
@@ -69,7 +69,7 @@ def extract_an_url(fname):
 
         fname -- The filename from which to extract the values.
     """
-    urls = cache_object( fname + '.send', dry_run = _g_dry_run )
+    urls = cache_object( fname + '.send' )
 
     url = None
     while ((url is None) and (len(urls) > 0)):
@@ -189,7 +189,7 @@ def main():
     random.shuffle( names )
 
     # Get a list of random IDs and the ones we've sent (and cached)
-    bash_cache = cache_object( 'bash', sep = ',', dry_run = _g_dry_run )
+    bash_cache = cache_object( 'bash', sep = ',' )
     bash_data  = (bash.get_randoms( bash_cache ), bash_cache)
 
     server = None if _g_dry_run else email1.get_server(email_addr, email_pass)

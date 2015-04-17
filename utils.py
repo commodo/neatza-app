@@ -32,7 +32,7 @@ class cache_object(set):
         self._file = os.path.join( CACHE_DIR, sanitize_file(_file) )
         self._dump_counter = 50
         self._sep = sep
-        self._dry_run = dry_run
+        self._dry_run = dry_run or 'dry-run' in sys.argv[1:]
 
         if (os.path.isfile(self._file)):
             with open( self._file, 'rb' ) as f:

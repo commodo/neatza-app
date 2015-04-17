@@ -17,18 +17,16 @@ log.getLogger("requests").setLevel(log.WARNING)
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
-_g_dry_run = False
-
 def _update_sources( sources ):
 
     for key, slist in sources.items():
         for s in slist:
-            cache_to_compare = cache_object( s, dry_run = _g_dry_run )
+            cache_to_compare = cache_object( s )
             module = __import__('scrapers.' + s, fromlist = [ 'get_urls', 'requires_moderation' ])
             if (module.requires_moderation()):
-                cache_to_update = cache_object( key + '.moderate', dry_run = _g_dry_run )
+                cache_to_update = cache_object( key + '.moderate' )
             else:
-                cache_to_update = cache_object( key + '.send', dry_run = _g_dry_run )
+                cache_to_update = cache_object( key + '.send' )
 
             module.update_urls( cache_to_compare, cache_to_update )
 
@@ -60,7 +58,6 @@ def main():
     _update_sources( sources )
 
 if __name__ == "__main__":
-    _g_dry_run = 'dry-run' in sys.argv[1:]
     app_prep( 'update_sources.log' )
     try:
         main()
