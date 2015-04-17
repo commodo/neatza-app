@@ -35,7 +35,9 @@ import logging as log
 import traceback
 
 import ConfigParser
-from utils import cache_load, cache_save, app_prep
+from utils import cache_object, app_prep
+
+sys.setdefaultencoding('utf8')
 
 _g_dry_run = False
 log.getLogger("requests").setLevel(log.WARNING)
@@ -67,9 +69,7 @@ def extract_an_url(fname):
 
         fname -- The filename from which to extract the values.
     """
-    urls = list( cache_load( fname + '.send' ) )
-
-    random.shuffle(urls)
+    urls = cache_object( fname + '.send', dry_run = _g_dry_run )
 
     url = None
     while ((url is None) and (len(urls) > 0)):
@@ -79,11 +79,11 @@ def extract_an_url(fname):
 
     if (_g_dry_run):
         return url
-    urls_sent = cache_load( fname + '.sent' )
+    urls_sent = cache_object( fname + '.sent' )
     urls_sent.add( url )
 
-    cache_save( urls )
-    cache_save( urls_sent )
+    urls.save()
+    urls_sent.save()
 
     return (url)
 
@@ -104,7 +104,7 @@ def _get_bash_text( bash_data ):
 
     bash_fresh, bash_cache = bash_data
 
-    bash_text = ""
+    bash_text = u""
     if (len(bash_fresh) > 0):
         bash_id, bash_text = bash_fresh.pop()
         bash_cache.add(bash_id)
@@ -120,14 +120,14 @@ def _send_neatza( server, from_addr, tag, qotds, bash_data, img_url, to_addrs ):
 
     subject = u'[%s] from neatza app' % strftime("%Y-%m-%d", gmtime())
     msg_text = (u'Random Quote Of The Day for %s\n%s\n%s' % (tag.title(), quote, qauth)) + \
-               (u'\n\nRandom Bash.Org\n%s' % bash_text ) + \
+               (u'\n\nRandom Bash.Org\n' + bash_text ) + \
                (u'\n\n%s' % img_url )
     msg_html = (u'<div><b>Random Quote Of The Day for %s</b>' % (tag.title()) ) + \
                (u'<div style="margin-left: 30px; margin-top: 10px">') + \
                (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) ) + \
                (u'<br/><br/>') + \
                (u'<div><b>Random Bash.Org</b><br />') + \
-               (u'%s</div>' % bash_text) + \
+               (u'%s</div>' + bash_text) + \
                (u'<br/><br/>') + \
                (u'<img src="%s" style="max-width: 700px" >' % img_url )
 
@@ -189,7 +189,7 @@ def main():
     random.shuffle( names )
 
     # Get a list of random IDs and the ones we've sent (and cached)
-    bash_cache = bash.get_cache()
+    bash_cache = cache_object( 'bash', sep = ',', dry_run = _g_dry_run )
     bash_data  = (bash.get_randoms( bash_cache ), bash_cache)
 
     server = None if _g_dry_run else email1.get_server(email_addr, email_pass)
@@ -207,9 +207,9 @@ def main():
 
         _send_neatza( server, email_addr, name, qotds, bash_data, url, to_addrs )
 
+    bash_cache.save()
     if (not _g_dry_run):
         server.quit()
-        bash.save_cache (bash_data[1])
 
 if __name__ == "__main__":
     _g_dry_run = 'dry-run' in sys.argv[1:]

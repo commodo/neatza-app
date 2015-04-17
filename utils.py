@@ -22,33 +22,38 @@ def app_prep(log_file):
                     format   = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level    = log.INFO)
 
-def sanitize_url( url ):
-    return url.replace('http://', '').replace('https://', '').replace('/', '_')
+def sanitize_file( _file ):
+    return _file.replace('http://', '').replace('https://', '').replace('/', '_')
 
-def cache_load( url, sep = '\n'):
+class cache_object(set):
 
-    class cache_object(set):
-        def __init__(self, *args, **kw_args):
-            set.__init__( self, *args, **kw_args )
-            self._file = None
+    def __init__(self, _file, sep = '\n', dry_run = False ):
+        set.__init__( self)
+        self._file = os.path.join( CACHE_DIR, sanitize_file(_file) )
+        self._dump_counter = 50
+        self._sep = sep
+        self._dry_run = dry_run
 
-    cache = cache_object()
-    cache_file = os.path.join( CACHE_DIR, sanitize_url(url) )
-    if (os.path.isfile ( cache_file ) ):
-        with open( cache_file, 'rb' ) as f:
-            cache = cache_object( [ l.strip() for l in  f.read().split(sep) ] )
-    cache._file = cache_file
+        if (os.path.isfile(self._file)):
+            with open( self._file, 'rb' ) as f:
+                self.update( set( [ l.strip() for l in  f.read().split(sep) ] ) )
 
-    return cache
+    def add(self, *args, **kw_args):
+        set.add(self, *args, **kw_args)
+        if (self._dry_run):
+            return
 
-def cache_save( cache, sep = '\n' ):
+        self._dump_counter -= 1
 
-    if (cache._file is None):
-        return
+        if (self._dump_counter <= 0):
+            self._dump_counter = 50
+            self.save()
 
-    if (len(cache) == 0):
-        return
+    def save(self):
+        if (self._dry_run):
+            return
 
-    ensure_dir( CACHE_DIR )
-    with open( cache._file, 'wb' ) as f:
-        f.write( sep.join(cache) )
+        ensure_dir( CACHE_DIR )
+        with open( self._file, 'wb' ) as f:
+            f.write( self._sep.join(self) )
+

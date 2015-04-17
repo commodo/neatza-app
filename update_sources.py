@@ -11,7 +11,7 @@ import logging as log
 import traceback
 
 import ConfigParser
-from utils import cache_load, cache_save, app_prep
+from utils import cache_object, app_prep
 
 log.getLogger("requests").setLevel(log.WARNING)
 
@@ -23,21 +23,17 @@ def _update_sources( sources ):
 
     for key, slist in sources.items():
         for s in slist:
-            cache_to_compare = cache_load( s )
+            cache_to_compare = cache_object( s, dry_run = _g_dry_run )
             module = __import__('scrapers.' + s, fromlist = [ 'get_urls', 'requires_moderation' ])
             if (module.requires_moderation()):
-                cache_to_update = cache_load( key + '.moderate' )
+                cache_to_update = cache_object( key + '.moderate', dry_run = _g_dry_run )
             else:
-                cache_to_update = cache_load( key + '.send' )
-            if (_g_dry_run):
-                cache_to_compare._file = None
-                cache_to_update._file = None
+                cache_to_update = cache_object( key + '.send', dry_run = _g_dry_run )
 
             module.update_urls( cache_to_compare, cache_to_update )
 
-            if (not _g_dry_run):
-                cache_save( cache_to_compare )
-                cache_save( cache_to_update )
+            cache_to_compare.save()
+            cache_to_update.save()
 
 
 def _build_group_map(config, section):

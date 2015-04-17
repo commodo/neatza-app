@@ -5,13 +5,7 @@
 import os
 import urllib
 from bs4 import BeautifulSoup
-from utils import cache_load, cache_save
-
-def get_cache():
-    return cache_load( 'bash', sep = ',' )
-
-def save_cache( bash_cache ):
-    cache_save( bash_cache, sep = ',' )
+from utils import cache_object
 
 def get_randoms( bash_cache = None):
 
