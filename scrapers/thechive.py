@@ -22,7 +22,7 @@ def update_urls( cache_to_compare, cache_to_update, from_page = 1, to_page = Non
 
     curr_page = from_page
     if (to_page is None):
-        to_page = 999999999
+        to_page = 9999
 
     urls = []
     keep_going = True
@@ -34,7 +34,7 @@ def update_urls( cache_to_compare, cache_to_update, from_page = 1, to_page = Non
         blog_urls = [ u.find( 'a' )['href'] for u in blog_urls ]
 
         for blog_url in blog_urls:
-            if (cache_to_compare and (blog_url in cache_to_compare)):
+            if (blog_url in cache_to_compare):
                 keep_going = False
                 log.info( "  URL '%s' found in cache. Stopping..." % blog_url )
                 break

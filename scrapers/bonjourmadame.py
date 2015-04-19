@@ -33,7 +33,7 @@ def update_urls( cache_to_compare, cache_to_update, from_page = 1, to_page = Non
 
     curr_page = from_page
     if (to_page is None):
-        to_page = 999999999
+        to_page = 9999
 
     cache_url, img_url = get_url( from_url % curr_page  )
     keep_going = (cache_url is not None) and (img_url is not None)
