@@ -39,7 +39,7 @@ def update_urls( cache_to_compare, cache_to_update, from_page = 1, to_page = Non
                 log.info( "  URL '%s' found in cache. Stopping..." % blog_url )
                 break
             for img_url in get_blog_entry_urls(blog_url):
-                log.info( img_url )
+                log.info( str((blog_url, img_url)) )
                 cache_to_compare.add( blog_url )
                 cache_to_update.add( img_url )
 
