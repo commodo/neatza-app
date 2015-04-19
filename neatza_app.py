@@ -37,7 +37,8 @@ import traceback
 import ConfigParser
 from utils import cache_object, app_prep
 
-sys.setdefaultencoding('utf-8')
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 _g_dry_run = False
 log.getLogger("requests").setLevel(log.WARNING)
@@ -127,7 +128,7 @@ def _send_neatza( server, from_addr, tag, qotds, bash_data, img_url, to_addrs ):
                (u'%s<br/><b>%s</b></div></div>' % (quote, qauth) ) + \
                (u'<br/><br/>') + \
                (u'<div><b>Random Bash.Org</b><br />') + \
-               (u'%s</div>' + bash_text) + \
+               (u'%s</div>' % bash_text) + \
                (u'<br/><br/>') + \
                (u'<img src="%s" style="max-width: 700px" >' % img_url )
 
