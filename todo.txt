@@ -1,2 +1,4 @@
 Add weather support
 Add pinterest.com + 500px.com scraper
+Add http://thebrigade.com/category/funny/bad-idea-weekend/
+Add http://tapiture.com/
