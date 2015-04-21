@@ -1,0 +1,43 @@
+body {
+    text-align: center;
+    font-family:Verdana, Geneva, sans-serif;
+    padding:0;
+    margin:0;
+    width: 100%;
+}
+
+h1 {
+    margin: auto;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:visited {
+    color: #000;
+}
+
+table, img {
+    width: 100%;
+    max-width:500px;
+}
+
+input[type=submit] {
+    width: 100%;
+    height: 100px;
+    margin: 0;
+    border: 0;
+    color: #fff;
+    font-size:x-large;
+    font-style:bold;
+}
+
+#approve {
+    background: #30A67C;
+}
+
+#discard {
+    background: #E1563F;
+}
+
