@@ -27,7 +27,7 @@ def update_urls( base_url, cache_to_compare, cache_to_update, from_page = 1, to_
         blog_urls = soup.findAll( 'h2', attrs={ 'class' : 'post-title' } )
         if (len(blog_urls) == 0):
             break
-        blog_urls = [ u.find('a')['href'] for u in blog_urls ]
+        blog_urls = [ u.find('a')['href'] for u in blog_urls if u.find('a') ]
 
         for blog_url in blog_urls:
             if (blog_url in cache_to_compare):
