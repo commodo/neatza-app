@@ -28,7 +28,7 @@ def sanitize_file( _file ):
 class cache_object(set):
 
     def __init__(self, _file, sep = '\n' ):
-        set.__init__( self)
+        set.__init__( self )
         self._file = os.path.join( CACHE_DIR, sanitize_file(_file) )
         self._dump_counter = 50
         self._sep = sep
@@ -36,10 +36,13 @@ class cache_object(set):
 
         if (os.path.isfile(self._file)):
             with open( self._file, 'rb' ) as f:
-                self.update( set( [ l.strip() for l in  f.read().split(sep) ] ) )
+                self.update( set( [ l.strip() for l in f.read().split(sep) if l ] ) )
 
-    def add(self, *args, **kw_args):
-        set.add(self, *args, **kw_args)
+    def add(self, elem):
+        if (elem is None or not isinstance(elem, str)):
+            return
+
+        set.add(self, elem)
         if (self._dry_run):
             return
 
@@ -52,8 +55,16 @@ class cache_object(set):
     def save(self):
         if (self._dry_run):
             return
+        if (len(self) == 0):
+            return
+
+        sanitized = set()
+        try:
+            sanitized = set( [ str(l) for l in self if l ] )
+        except:
+            return
 
         ensure_dir( CACHE_DIR )
         with open( self._file, 'wb' ) as f:
-            f.write( self._sep.join(self) )
+            f.write( self._sep.join(sanitized) )
 

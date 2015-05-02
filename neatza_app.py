@@ -51,6 +51,7 @@ def valid_image(img_url):
 
         img_url -- The URL of the possible image.
     """
+    return True
 
     if (img_url is None or len(img_url) == 0):
         return False
@@ -77,6 +78,9 @@ def extract_an_url(fname):
         url = urls.pop()
         if (not valid_image(url)):
             url = None
+
+    if (url is None):
+        return
 
     if (_g_dry_run):
         return url
