@@ -27,7 +27,6 @@ from time import gmtime, strftime
 import os
 from PIL import Image
 import requests
-import cStringIO
 import random
 
 import logging as log
@@ -35,7 +34,7 @@ import logging as log
 import traceback
 
 import ConfigParser
-from utils import cache_object, app_prep
+from utils import cache_object, app_prep, load_image_from_url
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -52,17 +51,7 @@ def valid_image(img_url):
         img_url -- The URL of the possible image.
     """
     return True
-
-    if (img_url is None or len(img_url) == 0):
-        return False
-    try:
-        r = requests.get(img_url)
-        f = cStringIO.StringIO(r.raw.read())
-        Image.open(f)
-        return True
-    except:
-        log.error("URL '%s' is not a valid image" % img_url)
-        return False
+    return load_image_from_url( img_url )
 
 def extract_an_url(fname):
     """ Extracts from a filename the list
