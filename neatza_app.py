@@ -36,11 +36,7 @@ import traceback
 import ConfigParser
 from utils import cache_object, app_prep, load_image_from_url
 
-reload(sys)
-sys.setdefaultencoding("utf-8")
-
 _g_dry_run = False
-log.getLogger("requests").setLevel(log.WARNING)
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -64,7 +60,7 @@ def extract_an_url(fname):
 
     url = None
     while ((url is None) and (len(urls) > 0)):
-        url = urls.pop()
+        url = urls.pop_random()
         if (not valid_image(url)):
             url = None
 

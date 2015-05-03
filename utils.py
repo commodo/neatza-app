@@ -1,6 +1,7 @@
 
 import os
 import sys
+import random
 import logging as log
 import Image
 import requests
@@ -57,6 +58,11 @@ def ensure_dir( dirname ):
 
 def app_prep(log_file):
 
+    reload(sys)
+    sys.setdefaultencoding("utf-8")
+
+    log.getLogger("requests").setLevel(log.WARNING)
+
     nolog = 'nolog' in sys.argv[1:]
     if (nolog):
         log.getLogger().setLevel(log.INFO)
@@ -95,6 +101,18 @@ class cache_object(set):
         if (self._dump_counter <= 0):
             self._dump_counter = 50
             self.save()
+
+    def pop_random(self):
+        if (len(self) == 0):
+            return
+        l = list ( self )
+        random.shuffle( l )
+        el = l.pop()
+        try:
+            self.remove( el )
+        except:
+            pass
+        return el
 
     def save(self):
         if (self._dry_run):

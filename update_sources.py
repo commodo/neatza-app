@@ -13,8 +13,6 @@ import traceback
 import ConfigParser
 from utils import cache_object, app_prep
 
-log.getLogger("requests").setLevel(log.WARNING)
-
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def _update_sources( sources ):
