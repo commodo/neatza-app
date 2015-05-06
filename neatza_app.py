@@ -119,7 +119,7 @@ def _send_neatza( server, from_addr, tag, qotds, bash_data, img_url, to_addrs ):
                (u'<div><b>Random Bash.Org</b><br />') + \
                (u'%s</div>' % bash_text) + \
                (u'<br/><br/>') + \
-               (u'<img src="%s" style="max-width: 700px" >' % img_url )
+               (u'<img src="%s" width="500px" >' % img_url )
 
     if (_g_dry_run):
         return
