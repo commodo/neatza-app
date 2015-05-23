@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 
 # -*- coding: utf-8 -*-
 
@@ -7,7 +7,7 @@ Neatza App
 
 Or morning app; morning from the 'Good Morning' greeting.
 
-Simple application that sends emails + quotes with pictures to an 
+Simple application that sends emails + quotes with pictures to an
 email address, preferably an emailing list.
 
 The email is currently comprised of a Quote of the Day + a picture.
@@ -25,8 +25,6 @@ from qotds import get_qotds
 
 from time import gmtime, strftime
 import os
-from PIL import Image
-import requests
 import random
 
 import logging as log
@@ -79,7 +77,6 @@ def extract_an_url(fname):
 
 def _get_to_addrs(config, tag, default_dst_addr = None):
 
-    to_addrs = []
     try:
         to_addrs = config.get ( 'email_overrides', tag )
         to_addrs = list( set( to_addrs.split(',') ) )
@@ -88,7 +85,13 @@ def _get_to_addrs(config, tag, default_dst_addr = None):
         if (default_dst_addr):
             to_addrs.append(default_dst_addr)
 
-    return to_addrs
+    try:
+        bcc_addrs = config.get( 'bcc', tag )
+        bcc_addrs = list( set( bcc_addrs.split(',') ) )
+    except:
+        bcc_addrs = []
+
+    return to_addrs, bcc_addrs
 
 def _get_bash_text( bash_data ):
 
@@ -101,7 +104,7 @@ def _get_bash_text( bash_data ):
 
     return bash_text
 
-def _send_neatza( server, from_addr, tag, qotds, bash_data, img_url, to_addrs ):
+def _send_neatza( server, from_addr, tag, qotds, bash_data, img_url, to_addrs, bcc_addrs ):
 
     quote, qauth = "", ""
     if (len(qotds) > 0):
@@ -129,7 +132,8 @@ def _send_neatza( server, from_addr, tag, qotds, bash_data, img_url, to_addrs ):
                 to_addrs  = to_addrs,
                 subject   = subject,
                 msg_text  = msg_text,
-                msg_html  = msg_html)
+                msg_html  = msg_html,
+                bcc_addrs = bcc_addrs)
 
 def _build_group_reverse_map(config, section):
     rev_map = {}
@@ -143,18 +147,6 @@ def _build_group_reverse_map(config, section):
             break
 
     return rev_map
-
-def _build_group_map(config, section):
-    map_ = {}
-
-    for i in range(1,9999):
-        try:
-            id_ = 'group%d' % i
-            map_[id_] = [ n.strip() for n in config.get ( section, id_ ).split(',') ]
-        except:
-            break
-
-    return map_
 
 def main():
 
@@ -172,7 +164,6 @@ def main():
 
     # Build reverse maps for names to group names
     names_map = _build_group_reverse_map( config, 'names' )
-    sources   = _build_group_map( config, 'sources' )
 
     # Get the names into a list and shuffle them
     names = list(names_map.keys())
@@ -186,7 +177,7 @@ def main():
 
     for name in names:
 
-        to_addrs = _get_to_addrs(config, name, default_dst_addr)
+        to_addrs, bcc_addrs = _get_to_addrs(config, name, default_dst_addr)
         if (len(to_addrs) == 0):
             continue
 
@@ -195,7 +186,7 @@ def main():
         if (url is None):
             log.warning("No image URL for '%s'", name)
 
-        _send_neatza( server, email_addr, name, qotds, bash_data, url, to_addrs )
+        _send_neatza( server, email_addr, name, qotds, bash_data, url, to_addrs, bcc_addrs )
 
     bash_cache.save()
     if (not _g_dry_run):

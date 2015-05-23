@@ -7,6 +7,8 @@ group1=<group-of-names1>
 group2=<group-of-names2>
 [email_overrides]
 tag1=<another_destintaion.email.addr>,<yet_another_destination.email.addr>
+[bcc]
+group2=<some.bcc.email>
 [sources]
 group1=<scraper1_for_group1>,<scraper2_for_group1>
 group2=<scraper1_for_group2>,<scraper2_for_group2>
