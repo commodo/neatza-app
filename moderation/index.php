@@ -58,6 +58,7 @@
 
     <body>
 
+<?php if (strlen($img_url) > 0) { ?>
     <form method='post'>
     <table>
     <tr>
@@ -71,7 +72,9 @@
     </tr>
     </table>
     </form>
-
+<?php } else { ?>
+    <h1>DONE</h1>
+<?php } ?>
     </body>
 
 </html>
