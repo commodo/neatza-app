@@ -50,27 +50,12 @@ class cache_object(set):
     def __init__(self, _file, sep = '\n' ):
         set.__init__( self )
         self._file = os.path.join( CACHE_DIR, sanitize_file(_file) )
-        self._dump_counter = 50
         self._sep = sep
         self._dry_run = 'dry-run' in sys.argv[1:]
 
         if (os.path.isfile(self._file)):
             with open( self._file, 'rb' ) as f:
                 self.update( set( [ l.strip() for l in f.read().split(sep) ] ) )
-
-    def add(self, elem):
-        if (elem is None or not isinstance(elem, str)):
-            return
-
-        set.add(self, elem)
-        if (self._dry_run):
-            return
-
-        self._dump_counter -= 1
-
-        if (self._dump_counter <= 0):
-            self._dump_counter = 50
-            self.save()
 
     def pop_random(self):
         if (len(self) == 0):
