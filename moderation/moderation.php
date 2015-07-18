@@ -25,11 +25,8 @@
     }
 
 
-    $fname = "";
-    if (isset($_GET['group']) && file_exists("../cache/" . $_GET['group'])) {
-        $file = $_GET['group'];
-        $fname = "../cache/" . $file;
-        $lines = file( $fname, FILE_IGNORE_NEW_LINES);
+    if (strlen($file) > 0) {
+        $lines = file( "../cache/" . $file, FILE_IGNORE_NEW_LINES);
         $img_url = do_post_action($file, $lines);
     }
 
