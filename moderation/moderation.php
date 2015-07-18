@@ -1,12 +1,9 @@
 <?php
     require_once("utils.php");
 
-    $redirect_url = "/";
     $file = "";
-    if (isset($_GET['group']) && file_exists("../cache/" . $_GET['group'])) {
+    if (isset($_GET['group']) && file_exists("../cache/" . $_GET['group']))
         $file = $_GET['group'];
-        $redirect_url = "/moderation.php?group=$file";
-    }
 
     function do_post_action($file, $lines) {
         $file_send = "";
@@ -18,8 +15,7 @@
             }
             $lines = array_slice( $lines, 1 );
             file_put_contents( "../cache/" . $file, implode("\n",$lines ) );
-            redirect( $redirect_url );
-            exit( 0 );
+            $img_url = $lines[0];
         }
         return $img_url;
     }
@@ -30,10 +26,6 @@
         $img_url = do_post_action($file, $lines);
     }
 
-    if (count($_POST) > 0) {
-        redirect( $redirect_url );
-        return;
-    }
 ?>
 
 <html>
