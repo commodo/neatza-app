@@ -85,3 +85,55 @@ class cache_object(set):
         with open( self._file, 'wb' ) as f:
             f.write( self._sep.join(sanitized) )
 
+
+def browser_open( url = None ):
+
+    def close2():
+        try:
+            browser.close()
+        except:
+            log.warning("No browser to close() : %s" % str(url))
+    def quit2():
+        try:
+            browser.quit()
+        except:
+            log.warning("No browser to quit() : %s" %str(url))
+
+    def close_other_windows():
+        o_wind = browser.current_window_handle
+        for hnd in browser.window_handles:
+            if (hnd == o_wind):
+                continue
+            browser.switch_to_window(hnd)
+            browser.close2()
+        browser.switch_to_window(o_wind)
+
+    try:
+        profile = webdriver.FirefoxProfile()
+        profile.set_preference("webdriver.log.file", os.path.join(LOG_DIR, "firefox.log"))
+        browser = webdriver.Firefox(profile)
+        #cookies_file = os.path.join( CACHE_DIR, 'cookies' )
+        #def __browser_close():
+        #    pickle.dump( browser.get_cookies() , open(cookies_file, "wb") )
+        #    browser.quit()
+
+        browser.close2 = close2
+        browser.quit2 = quit2
+        browser.close_other_windows = close_other_windows
+
+        # this is some pythonic voodoo we'll use later
+        #browser.close = __browser_close
+        browser.maximize_window()
+        browser.set_page_load_timeout(90)
+        if (url):
+            browser.get(url)
+        #if (os.path.isfile( cookies_file )):
+        #    cookies = pickle.load(open(cookies_file, "rb"))
+        #    for cookie in cookies:
+        #        browser.add_cookie(cookie)
+
+        # maybe later load cookies here
+    except:
+        return
+
+    return browser
