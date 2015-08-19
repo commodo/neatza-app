@@ -10,6 +10,7 @@ def get_blog_entry_urls( blog_entry_url ):
 
     soup = BeautifulSoup( urllib.urlopen(blog_entry_url).read() )
     imgs = soup.findAll( 'img', attrs = { 'class' : 'attachment-full' } )
+    imgs += soup.findAll( 'img', attrs = { 'class' : 'attachment-gallery-item-full' } )
 
     return [ img['src'] for img in imgs ]
 
