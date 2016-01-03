@@ -1,5 +1,8 @@
-Neatza App
+Neatza App (Project is EOL-ed)
 ==========
+
+This project is no longer maintained/worked upon or used.
+Leaving the code here for reference.
 
 Neatza == Morning (as the greeting 'Good Morning') in Romanian.
 
